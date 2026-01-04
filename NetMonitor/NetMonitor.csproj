@@ -101,18 +101,17 @@
     </Compile>
     <Compile Include="NetMonitorCore.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="Resource.Designer.cs">
+    <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>Resource.resx</DependentUpon>
+      <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <EmbeddedResource Include="NetMonitor.resx">
       <DependentUpon>NetMonitor.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resource.resx" />
-    <EmbeddedResource Include="Resource.resx">
+    <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -120,7 +119,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="NetMonitor.ico" />
-    <None Include="Resources\img.gif" />
     <Content Include="tool-pro.ico" />
   </ItemGroup>
   <ItemGroup>
