@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Timers;
 using System.Windows.Forms;
 using System.Threading;
+using System.Linq;
 
 namespace NetMonitor
 {
@@ -15,6 +16,7 @@ namespace NetMonitor
         bool Start = false;
         private NetworkInterface[] nicArr;      //网卡集合
         private System.Timers.Timer timers; 
+
         //计时器
         
         public NetMonitor()
@@ -49,45 +51,88 @@ namespace NetMonitor
             });
         }
 
+        /*        private void SetGifBackground()
+                {
+                    Image gif = Resource.Cat;
+                    System.Drawing.Imaging.FrameDimension fd = new System.Drawing.Imaging.FrameDimension(gif.FrameDimensionsList[0]);
+                    int count = gif.GetFrameCount(fd);    //获取帧数(gif图片可能包含多帧，其它格式图片一般仅一帧)
+                    System.Windows.Forms.Timer giftimer = new System.Windows.Forms.Timer();
+                    giftimer.Interval = 120;//这里是可以调节速度的
+                    int i = 0;
+                    Image bgImg = null;
+                    System.IO.Stream stream = new System.IO.MemoryStream();
+                    giftimer.Tick += (s, e) =>
+                    {
+                            if (i >= count)
+                            {
+                                i = 0;
+                            }
+                            gif.SelectActiveFrame(fd, i);
+                            gif.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                            if (bgImg != null)
+                            {
+                                bgImg.Dispose();
+                            }
+                            bgImg = Image.FromStream(stream);
+                            this.pictureBox.BackgroundImage = bgImg;///
+                            i++;
+                        Thread.Sleep(0);
+                    };
+                    giftimer.Start();
+                }*/
         private void SetGifBackground()
         {
             Image gif = Properties.Resources.Cat;
             System.Drawing.Imaging.FrameDimension fd = new System.Drawing.Imaging.FrameDimension(gif.FrameDimensionsList[0]);
-            int count = gif.GetFrameCount(fd);    //获取帧数(gif图片可能包含多帧，其它格式图片一般仅一帧)
+            int count = gif.GetFrameCount(fd);
             System.Windows.Forms.Timer giftimer = new System.Windows.Forms.Timer();
-            giftimer.Interval = 120;//这里是可以调节速度的
+            giftimer.Interval = 120;
             int i = 0;
             Image bgImg = null;
             System.IO.Stream stream = new System.IO.MemoryStream();
             giftimer.Tick += (s, e) =>
             {
+                try
+                {
                     if (i >= count)
                     {
                         i = 0;
                     }
                     gif.SelectActiveFrame(fd, i);
+                    stream.SetLength(0); // Clear the stream
                     gif.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                    stream.Seek(0, System.IO.SeekOrigin.Begin); // Reset the stream position
                     if (bgImg != null)
                     {
                         bgImg.Dispose();
                     }
                     bgImg = Image.FromStream(stream);
-                    this.pictureBox.BackgroundImage = bgImg;///
+                    if (this.pictureBox.InvokeRequired)
+                    {
+                        this.pictureBox.Invoke(new Action(() => this.pictureBox.BackgroundImage = bgImg));
+                    }
+                    else
+                    {
+                        this.pictureBox.BackgroundImage = bgImg;
+                    }
                     i++;
-                Thread.Sleep(0);
+                }
+                catch (Exception ex)
+                {
+                    // Handle the exception, e.g., log it or stop the timer
+                    giftimer.Stop();
+                    Console.WriteLine("An error occurred: " + ex.Message);
+                }
             };
             giftimer.Start();
         }
 
         public void UpdateNetworkInterface()
         {
-            int netSend;
-            int netRecv;
-            NetworkInterface nic = nicArr[ComboBox.SelectedIndex]; 
-            IPv4InterfaceStatistics interfaceStats = nic.GetIPv4Statistics();
-            if (InterfaceSelect == ComboBox.SelectedIndex&&Start)
+            long netSend;
+            long netRecv;
+            if (ComboBox.Owner.InvokeRequired)
             {
-<<<<<<< HEAD
                 ComboBox.Owner.Invoke(new Action(UpdateNetworkInterface));
                 return;
             }
@@ -126,33 +171,16 @@ namespace NetMonitor
                     {
                         ComboBox.SelectedIndex = (ComboBox.SelectedIndex + 1) % nicArr.Length;
                     }
-=======
-                netSend = (int)(interfaceStats.BytesSent - double.Parse(Lable_TotalUP.Text));//这个是干扰？
-                netRecv = (int)(interfaceStats.BytesReceived - double.Parse(Lable_TotalDown.Text));
-                Lable_TotalUP.Text = interfaceStats.BytesSent.ToString();
-                Lable_TotalDown.Text = interfaceStats.BytesReceived.ToString();
-                System.Diagnostics.Debug.WriteLine(ComboBox.SelectedIndex.ToString());
-                if (netRecv==0&&netSend==0)
-                {
-                    ZreoTimes++;
->>>>>>> parent of 0e2f05a (Add files via upload)
                 }
                 else
                 {
-                    ZreoTimes = 0;
+                    netSend = 0;
+                    netRecv = 0;
+                    Lable_TotalUP.Text = interfaceStats.BytesSent.ToString();
+                    Lable_TotalDown.Text = interfaceStats.BytesReceived.ToString();
+                    InterfaceSelect = ComboBox.SelectedIndex;
+                    Start = !Start;
                 }
-                if(ZreoTimes>=5)
-                {
-                    try//修复网卡不能自动选择问题
-                    {
-                        ComboBox.SelectedIndex++;
-                    }
-                    catch
-                    {
-                        ComboBox.SelectedIndex = 0;
-                    }
-                }
-<<<<<<< HEAD
 
                 Lable_SpeedUP.Text = "上传：" + FormatSpeed(netSend);
                 Lable_SpeedDown.Text = "下载：" + FormatSpeed(netRecv);
@@ -168,53 +196,11 @@ namespace NetMonitor
             else if (bytes < 1024 * 1024)
             {
                 return $"{(bytes / 1024.0):F2}K/S";
-=======
->>>>>>> parent of 0e2f05a (Add files via upload)
             }
             else
             {
-                netSend = 0;
-                netRecv = 0;
-                Lable_TotalUP.Text = interfaceStats.BytesSent.ToString();
-                Lable_TotalDown.Text = interfaceStats.BytesReceived.ToString();
-                InterfaceSelect = ComboBox.SelectedIndex;
-                Start = !Start;  
+                return $"{(bytes / (1024.0 * 1024)):F2}M/S";
             }
-
-            string netRecvText = "";
-            string netSendText = "";
-            if (netRecv < 1024)
-            {
-                netRecvText = ((double)netRecv).ToString("0") + "B/S";
-            }
-            else if (netRecv<1024*1024)
-            {
-                netRecvText = ((double)netRecv / 1024).ToString("0.00") + "K/S";
-            }
-            else if (netRecv >= 1024 * 1024)
-            {
-                netRecvText = ((double)netRecv / (1024 * 1024)).ToString("0.00") + "M/S";
-            }
-
-
-            if (netSend < 1024)
-            {
-                netSendText = ((double)netSend ).ToString("0") + "B/S";
-            }
-            else if (netSend < 1024*1024)
-            {
-                netSendText = ((double)netSend/1024).ToString("0.00") + "K/S";
-            }
-            else if (netSend >= 1024 * 1024)
-            {
-                netSendText = ((double)netSend / (1024 * 1024)).ToString("0.00") + "M/S";
-            }
-
-
-            Lable_SpeedUP.Text = "上传：" + netSendText;
-            Lable_SpeedDown.Text = "下载：" + netRecvText;
-
-
         }
 
         private bool IsVirtualNetworkInterface(NetworkInterface nic)
@@ -275,12 +261,7 @@ namespace NetMonitor
 
         public void InitNetworkInterface()
         {
-<<<<<<< HEAD
             try
-=======
-            nicArr = NetworkInterface.GetAllNetworkInterfaces();
-            for (int i = 0; i < nicArr.Length; i++)
->>>>>>> parent of 0e2f05a (Add files via upload)
             {
                 ComboBox.Items.Clear();
 
