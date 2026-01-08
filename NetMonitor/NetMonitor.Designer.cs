@@ -30,44 +30,35 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NetMonitor));
-            this.pictureBox = new System.Windows.Forms.PictureBox();
             this.Menu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.Interface_Menu = new System.Windows.Forms.ToolStripMenuItem();
             this.ComboBox = new System.Windows.Forms.ToolStripComboBox();
             this.toolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
+            this.AutoRun_ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Exit_Menu = new System.Windows.Forms.ToolStripMenuItem();
-            this.Lable_SpeedDown = new System.Windows.Forms.Label();
-            this.Lable_SpeedUP = new System.Windows.Forms.Label();
+            this.pictureBox = new System.Windows.Forms.PictureBox();
             this.panel = new System.Windows.Forms.Panel();
+            this.Lable_SpeedUP = new System.Windows.Forms.Label();
+            this.Lable_SpeedDown = new System.Windows.Forms.Label();
             this.Lable_TotalUP = new System.Windows.Forms.Label();
             this.Lable_TotalDown = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             this.Menu.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             this.panel.SuspendLayout();
             this.SuspendLayout();
             // 
-            // pictureBox
-            // 
-            this.pictureBox.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.pictureBox.ContextMenuStrip = this.Menu;
-            this.pictureBox.Location = new System.Drawing.Point(0, 0);
-            this.pictureBox.Name = "pictureBox";
-            this.pictureBox.Size = new System.Drawing.Size(59, 56);
-            this.pictureBox.TabIndex = 2;
-            this.pictureBox.TabStop = false;
-            this.pictureBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.NetMonitor_MouseDown);
-            // 
             // Menu
             // 
+            this.Menu.AllowMerge = false;
             this.Menu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.Interface_Menu,
             this.toolStripSeparator,
+            this.AutoRun_ToolStripMenuItem,
             this.Exit_Menu});
             this.Menu.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
             this.Menu.Name = "contextMenuStrip1";
             this.Menu.ShowImageMargin = false;
-            this.Menu.Size = new System.Drawing.Size(100, 52);
+            this.Menu.Size = new System.Drawing.Size(100, 74);
             // 
             // Interface_Menu
             // 
@@ -93,6 +84,15 @@
             this.toolStripSeparator.Name = "toolStripSeparator";
             this.toolStripSeparator.Size = new System.Drawing.Size(96, 6);
             // 
+            // AutoRun_ToolStripMenuItem
+            // 
+            this.AutoRun_ToolStripMenuItem.Checked = true;
+            this.AutoRun_ToolStripMenuItem.CheckOnClick = true;
+            this.AutoRun_ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.AutoRun_ToolStripMenuItem.Name = "AutoRun_ToolStripMenuItem";
+            this.AutoRun_ToolStripMenuItem.Size = new System.Drawing.Size(99, 22);
+            this.AutoRun_ToolStripMenuItem.Text = "开机启动";
+            // 
             // Exit_Menu
             // 
             this.Exit_Menu.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
@@ -105,36 +105,24 @@
             this.Exit_Menu.Text = "退出";
             this.Exit_Menu.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Exit_Menu_MouseDown);
             // 
-            // Lable_SpeedDown
+            // pictureBox
             // 
-            this.Lable_SpeedDown.AutoSize = true;
-            this.Lable_SpeedDown.BackColor = System.Drawing.SystemColors.Control;
-            this.Lable_SpeedDown.ContextMenuStrip = this.Menu;
-            this.Lable_SpeedDown.Font = new System.Drawing.Font("楷体", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.Lable_SpeedDown.ForeColor = System.Drawing.Color.Black;
-            this.Lable_SpeedDown.Location = new System.Drawing.Point(66, 33);
-            this.Lable_SpeedDown.Name = "Lable_SpeedDown";
-            this.Lable_SpeedDown.Size = new System.Drawing.Size(84, 14);
-            this.Lable_SpeedDown.TabIndex = 1;
-            this.Lable_SpeedDown.Text = "下载：0B/S";
-            this.Lable_SpeedDown.MouseDown += new System.Windows.Forms.MouseEventHandler(this.NetMonitor_MouseDown);
-            // 
-            // Lable_SpeedUP
-            // 
-            this.Lable_SpeedUP.AutoSize = true;
-            this.Lable_SpeedUP.BackColor = System.Drawing.SystemColors.Control;
-            this.Lable_SpeedUP.ContextMenuStrip = this.Menu;
-            this.Lable_SpeedUP.Font = new System.Drawing.Font("楷体", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.Lable_SpeedUP.ForeColor = System.Drawing.Color.Black;
-            this.Lable_SpeedUP.Location = new System.Drawing.Point(66, 9);
-            this.Lable_SpeedUP.Name = "Lable_SpeedUP";
-            this.Lable_SpeedUP.Size = new System.Drawing.Size(84, 14);
-            this.Lable_SpeedUP.TabIndex = 0;
-            this.Lable_SpeedUP.Text = "上传：0B/S";
-            this.Lable_SpeedUP.MouseDown += new System.Windows.Forms.MouseEventHandler(this.NetMonitor_MouseDown);
+            this.pictureBox.BackColor = System.Drawing.Color.Transparent;
+            this.pictureBox.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.pictureBox.ContextMenuStrip = this.Menu;
+            this.pictureBox.Location = new System.Drawing.Point(0, 0);
+            this.pictureBox.Name = "pictureBox";
+            this.pictureBox.Size = new System.Drawing.Size(59, 56);
+            this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox.TabIndex = 2;
+            this.pictureBox.TabStop = false;
+            this.pictureBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.NetMonitor_MouseDown);
             // 
             // panel
             // 
+            this.panel.BackColor = System.Drawing.SystemColors.Control;
+            this.panel.BackgroundImage = global::NetMonitor.Properties.Resources.img_background;
+            this.panel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.panel.ContextMenuStrip = this.Menu;
             this.panel.Controls.Add(this.Lable_SpeedUP);
             this.panel.Controls.Add(this.Lable_SpeedDown);
@@ -147,9 +135,38 @@
             this.panel.TabIndex = 3;
             this.panel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.NetMonitor_MouseDown);
             // 
+            // Lable_SpeedUP
+            // 
+            this.Lable_SpeedUP.AutoSize = true;
+            this.Lable_SpeedUP.BackColor = System.Drawing.Color.White;
+            this.Lable_SpeedUP.ContextMenuStrip = this.Menu;
+            this.Lable_SpeedUP.Font = new System.Drawing.Font("楷体", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.Lable_SpeedUP.ForeColor = System.Drawing.Color.Black;
+            this.Lable_SpeedUP.Location = new System.Drawing.Point(66, 9);
+            this.Lable_SpeedUP.Name = "Lable_SpeedUP";
+            this.Lable_SpeedUP.Size = new System.Drawing.Size(84, 14);
+            this.Lable_SpeedUP.TabIndex = 0;
+            this.Lable_SpeedUP.Text = "上传：0B/S";
+            this.Lable_SpeedUP.MouseDown += new System.Windows.Forms.MouseEventHandler(this.NetMonitor_MouseDown);
+            // 
+            // Lable_SpeedDown
+            // 
+            this.Lable_SpeedDown.AutoSize = true;
+            this.Lable_SpeedDown.BackColor = System.Drawing.Color.White;
+            this.Lable_SpeedDown.ContextMenuStrip = this.Menu;
+            this.Lable_SpeedDown.Font = new System.Drawing.Font("楷体", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.Lable_SpeedDown.ForeColor = System.Drawing.Color.Black;
+            this.Lable_SpeedDown.Location = new System.Drawing.Point(66, 33);
+            this.Lable_SpeedDown.Name = "Lable_SpeedDown";
+            this.Lable_SpeedDown.Size = new System.Drawing.Size(84, 14);
+            this.Lable_SpeedDown.TabIndex = 1;
+            this.Lable_SpeedDown.Text = "下载：0B/S";
+            this.Lable_SpeedDown.MouseDown += new System.Windows.Forms.MouseEventHandler(this.NetMonitor_MouseDown);
+            // 
             // Lable_TotalUP
             // 
             this.Lable_TotalUP.AutoSize = true;
+            this.Lable_TotalUP.BackColor = System.Drawing.Color.White;
             this.Lable_TotalUP.Location = new System.Drawing.Point(163, 11);
             this.Lable_TotalUP.Name = "Lable_TotalUP";
             this.Lable_TotalUP.Size = new System.Drawing.Size(11, 12);
@@ -160,6 +177,7 @@
             // Lable_TotalDown
             // 
             this.Lable_TotalDown.AutoSize = true;
+            this.Lable_TotalDown.BackColor = System.Drawing.Color.White;
             this.Lable_TotalDown.Location = new System.Drawing.Point(163, 33);
             this.Lable_TotalDown.Name = "Lable_TotalDown";
             this.Lable_TotalDown.Size = new System.Drawing.Size(11, 12);
@@ -190,8 +208,8 @@
             this.TransparencyKey = System.Drawing.SystemColors.Control;
             this.Load += new System.EventHandler(this.NetMonitor_Load);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.NetMonitor_MouseDown);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
             this.Menu.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).EndInit();
             this.panel.ResumeLayout(false);
             this.panel.PerformLayout();
             this.ResumeLayout(false);
@@ -210,6 +228,7 @@
         private System.Windows.Forms.Label Lable_TotalUP;
         private System.Windows.Forms.Label Lable_TotalDown;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator;
+        private System.Windows.Forms.ToolStripMenuItem AutoRun_ToolStripMenuItem;
     }
 }
 

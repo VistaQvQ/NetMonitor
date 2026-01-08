@@ -99,7 +99,6 @@
     <Compile Include="NetMonitor.Designer.cs">
       <DependentUpon>NetMonitor.cs</DependentUpon>
     </Compile>
-    <Compile Include="NetMonitorCore.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -119,7 +118,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="NetMonitor.ico" />
-    <Content Include="tool-pro.ico" />
+    <None Include="Resources\img_background.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5">

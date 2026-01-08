@@ -82,7 +82,7 @@ namespace NetMonitor
                 }*/
         private void SetGifBackground()
         {
-            Image gif = Properties.Resources.Cat;
+            Image gif = Properties.Resources.TEST2;
             System.Drawing.Imaging.FrameDimension fd = new System.Drawing.Imaging.FrameDimension(gif.FrameDimensionsList[0]);
             int count = gif.GetFrameCount(fd);
             System.Windows.Forms.Timer giftimer = new System.Windows.Forms.Timer();
@@ -308,10 +308,10 @@ namespace NetMonitor
 
         private void NetMonitor_Load(object sender, EventArgs e)
         {
-            var accent = Color.FromArgb(0, 120, 215);
-            if (this.panel != null) this.panel.BackColor = accent;
-            if (this.Lable_SpeedUP != null) this.Lable_SpeedUP.BackColor = accent;
-            if (this.Lable_SpeedDown != null) this.Lable_SpeedDown.BackColor = accent;
+            //var accent = Color.FromArgb(0, 120, 215);
+            //if (this.panel != null) this.panel.BackColor = accent;
+            //if (this.Lable_SpeedUP != null) this.Lable_SpeedUP.BackColor = accent;
+            //if (this.Lable_SpeedDown != null) this.Lable_SpeedDown.BackColor = accent;
 
             this.Invoke((EventHandler)delegate
             {
