@@ -40,8 +40,6 @@
             this.panel = new System.Windows.Forms.Panel();
             this.Lable_SpeedUP = new System.Windows.Forms.Label();
             this.Lable_SpeedDown = new System.Windows.Forms.Label();
-            this.Lable_TotalUP = new System.Windows.Forms.Label();
-            this.Lable_TotalDown = new System.Windows.Forms.Label();
             this.Menu.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             this.panel.SuspendLayout();
@@ -121,13 +119,12 @@
             // panel
             // 
             this.panel.BackColor = System.Drawing.SystemColors.Control;
-            this.panel.BackgroundImage = global::NetMonitor.Properties.Resources.img_background;
+            this.panel.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("panel.BackgroundImage")));
             this.panel.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.panel.ContextMenuStrip = this.Menu;
             this.panel.Controls.Add(this.Lable_SpeedUP);
+            this.panel.Controls.Add(this.pictureBox);
             this.panel.Controls.Add(this.Lable_SpeedDown);
-            this.panel.Controls.Add(this.Lable_TotalUP);
-            this.panel.Controls.Add(this.Lable_TotalDown);
             this.panel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel.Location = new System.Drawing.Point(0, 0);
             this.panel.Name = "panel";
@@ -138,7 +135,7 @@
             // Lable_SpeedUP
             // 
             this.Lable_SpeedUP.AutoSize = true;
-            this.Lable_SpeedUP.BackColor = System.Drawing.Color.White;
+            this.Lable_SpeedUP.BackColor = System.Drawing.Color.Transparent;
             this.Lable_SpeedUP.ContextMenuStrip = this.Menu;
             this.Lable_SpeedUP.Font = new System.Drawing.Font("楷体", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.Lable_SpeedUP.ForeColor = System.Drawing.Color.Black;
@@ -152,7 +149,7 @@
             // Lable_SpeedDown
             // 
             this.Lable_SpeedDown.AutoSize = true;
-            this.Lable_SpeedDown.BackColor = System.Drawing.Color.White;
+            this.Lable_SpeedDown.BackColor = System.Drawing.Color.Transparent;
             this.Lable_SpeedDown.ContextMenuStrip = this.Menu;
             this.Lable_SpeedDown.Font = new System.Drawing.Font("楷体", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.Lable_SpeedDown.ForeColor = System.Drawing.Color.Black;
@@ -163,28 +160,6 @@
             this.Lable_SpeedDown.Text = "下载：0B/S";
             this.Lable_SpeedDown.MouseDown += new System.Windows.Forms.MouseEventHandler(this.NetMonitor_MouseDown);
             // 
-            // Lable_TotalUP
-            // 
-            this.Lable_TotalUP.AutoSize = true;
-            this.Lable_TotalUP.BackColor = System.Drawing.Color.White;
-            this.Lable_TotalUP.Location = new System.Drawing.Point(163, 11);
-            this.Lable_TotalUP.Name = "Lable_TotalUP";
-            this.Lable_TotalUP.Size = new System.Drawing.Size(11, 12);
-            this.Lable_TotalUP.TabIndex = 4;
-            this.Lable_TotalUP.Text = "0";
-            this.Lable_TotalUP.Visible = false;
-            // 
-            // Lable_TotalDown
-            // 
-            this.Lable_TotalDown.AutoSize = true;
-            this.Lable_TotalDown.BackColor = System.Drawing.Color.White;
-            this.Lable_TotalDown.Location = new System.Drawing.Point(163, 33);
-            this.Lable_TotalDown.Name = "Lable_TotalDown";
-            this.Lable_TotalDown.Size = new System.Drawing.Size(11, 12);
-            this.Lable_TotalDown.TabIndex = 5;
-            this.Lable_TotalDown.Text = "0";
-            this.Lable_TotalDown.Visible = false;
-            // 
             // NetMonitor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -192,7 +167,6 @@
             this.BackColor = System.Drawing.SystemColors.Control;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
             this.ClientSize = new System.Drawing.Size(193, 56);
-            this.Controls.Add(this.pictureBox);
             this.Controls.Add(this.panel);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
@@ -221,12 +195,10 @@
         private System.Windows.Forms.Label Lable_SpeedDown;
         private System.Windows.Forms.Label Lable_SpeedUP;
         private System.Windows.Forms.Panel panel;
-        private System.Windows.Forms.ContextMenuStrip Menu;
+        new private System.Windows.Forms.ContextMenuStrip Menu;
         private System.Windows.Forms.ToolStripMenuItem Exit_Menu;
         private System.Windows.Forms.ToolStripMenuItem Interface_Menu;
         private System.Windows.Forms.ToolStripComboBox ComboBox;
-        private System.Windows.Forms.Label Lable_TotalUP;
-        private System.Windows.Forms.Label Lable_TotalDown;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator;
         private System.Windows.Forms.ToolStripMenuItem AutoRun_ToolStripMenuItem;
     }

@@ -63,6 +63,16 @@ namespace NetMonitor.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        internal static System.Drawing.Bitmap Cadogt {
+            get {
+                object obj = ResourceManager.GetObject("Cadogt", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         internal static System.Drawing.Bitmap Cat {
             get {
                 object obj = ResourceManager.GetObject("Cat", resourceCulture);
@@ -76,26 +86,6 @@ namespace NetMonitor.Properties {
         internal static System.Drawing.Bitmap img_background {
             get {
                 object obj = ResourceManager.GetObject("img_background", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
-        /// </summary>
-        internal static System.Drawing.Bitmap TEST {
-            get {
-                object obj = ResourceManager.GetObject("TEST", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
-        /// </summary>
-        internal static System.Drawing.Bitmap TEST2 {
-            get {
-                object obj = ResourceManager.GetObject("TEST2", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
