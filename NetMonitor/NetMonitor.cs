@@ -299,7 +299,7 @@ public const int HTCAPTION = 0x0002;
             }
             else if (bytes < 1024 * 1024)
             {
-                return $"{(bytes / 1024.0):F2}K/S";
+                return $"{(bytes / 1024.0):F0}K/S";
             }
             else
             {
