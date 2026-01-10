@@ -1,0 +1,10 @@
+D:\DailyWork\NetMonitor\NetMonitor\bin\x64\Release\NetMonitor.exe.config
+D:\DailyWork\NetMonitor\NetMonitor\bin\x64\Release\NetMonitor.exe
+D:\DailyWork\NetMonitor\NetMonitor\bin\x64\Release\NetMonitor.pdb
+D:\DailyWork\NetMonitor\NetMonitor\obj\x64\Release\NetMonitor.csproj.AssemblyReference.cache
+D:\DailyWork\NetMonitor\NetMonitor\obj\x64\Release\NetMonitor.NetMonitor.resources
+D:\DailyWork\NetMonitor\NetMonitor\obj\x64\Release\NetMonitor.Properties.Resources.resources
+D:\DailyWork\NetMonitor\NetMonitor\obj\x64\Release\NetMonitor.csproj.GenerateResource.cache
+D:\DailyWork\NetMonitor\NetMonitor\obj\x64\Release\NetMonitor.csproj.CoreCompileInputs.cache
+D:\DailyWork\NetMonitor\NetMonitor\obj\x64\Release\NetMonitor.exe
+D:\DailyWork\NetMonitor\NetMonitor\obj\x64\Release\NetMonitor.pdb

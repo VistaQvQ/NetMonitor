@@ -39,8 +39,6 @@
             this.Lable_SpeedDown = new System.Windows.Forms.Label();
             this.Lable_SpeedUP = new System.Windows.Forms.Label();
             this.panel = new System.Windows.Forms.Panel();
-            this.Lable_TotalUP = new System.Windows.Forms.Label();
-            this.Lable_TotalDown = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
             this.Menu.SuspendLayout();
             this.panel.SuspendLayout();
@@ -138,34 +136,12 @@
             this.panel.ContextMenuStrip = this.Menu;
             this.panel.Controls.Add(this.Lable_SpeedUP);
             this.panel.Controls.Add(this.Lable_SpeedDown);
-            this.panel.Controls.Add(this.Lable_TotalUP);
-            this.panel.Controls.Add(this.Lable_TotalDown);
             this.panel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel.Location = new System.Drawing.Point(0, 0);
             this.panel.Name = "panel";
             this.panel.Size = new System.Drawing.Size(193, 56);
             this.panel.TabIndex = 3;
             this.panel.MouseDown += new System.Windows.Forms.MouseEventHandler(this.NetMonitor_MouseDown);
-            // 
-            // Lable_TotalUP
-            // 
-            this.Lable_TotalUP.AutoSize = true;
-            this.Lable_TotalUP.Location = new System.Drawing.Point(163, 11);
-            this.Lable_TotalUP.Name = "Lable_TotalUP";
-            this.Lable_TotalUP.Size = new System.Drawing.Size(11, 12);
-            this.Lable_TotalUP.TabIndex = 4;
-            this.Lable_TotalUP.Text = "0";
-            this.Lable_TotalUP.Visible = false;
-            // 
-            // Lable_TotalDown
-            // 
-            this.Lable_TotalDown.AutoSize = true;
-            this.Lable_TotalDown.Location = new System.Drawing.Point(163, 33);
-            this.Lable_TotalDown.Name = "Lable_TotalDown";
-            this.Lable_TotalDown.Size = new System.Drawing.Size(11, 12);
-            this.Lable_TotalDown.TabIndex = 5;
-            this.Lable_TotalDown.Text = "0";
-            this.Lable_TotalDown.Visible = false;
             // 
             // NetMonitor
             // 
@@ -207,8 +183,6 @@
         private System.Windows.Forms.ToolStripMenuItem Exit_Menu;
         private System.Windows.Forms.ToolStripMenuItem Interface_Menu;
         private System.Windows.Forms.ToolStripComboBox ComboBox;
-        private System.Windows.Forms.Label Lable_TotalUP;
-        private System.Windows.Forms.Label Lable_TotalDown;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator;
     }
 }

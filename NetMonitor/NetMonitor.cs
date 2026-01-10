@@ -15,10 +15,20 @@ namespace NetMonitor
         int ZreoTimes = 0;
         bool Start = false;
         private NetworkInterface[] nicArr;      //网卡集合
-        private System.Timers.Timer timers; 
+        private System.Timers.Timer timers;
 
         //计时器
-        
+        private System.Windows.Forms.Timer giftimer;
+        private Image[] gifFrames;
+        private int gifFrameIndex = 0;
+        private int gifFrameCount = 0;
+        // 可调整：1 = 原始帧率（更慢），2 = 中速，4 = 较快（默认）
+        private int gifStep = 1;
+
+        // 新增字段（类级别）
+        private long prevBytesSent = 0;
+        private long prevBytesRecv = 0;
+
         public NetMonitor()
         {
             InitializeComponent();
@@ -26,14 +36,46 @@ namespace NetMonitor
             InitializeTimer();
         }
 
+        /// <summary>
+        /// 从 user32.dll 导入 ReleaseCapture 函数。
+        /// 说明：释放当前窗口对鼠标的捕获。常用于在自定义窗体标题栏或无边框窗体中实现拖动功能时，
+        /// 在开始发送移动消息之前释放系统对鼠标的捕获，以便后续通过 SendMessage 模拟系统移动窗口的行为。
+        /// </summary>
+        /// <returns>如果成功返回 true，否则返回 false。</returns>
         [DllImport("user32.dll")]
         public static extern bool ReleaseCapture();
+
+        /// <summary>
+        /// 从 user32.dll 导入 SendMessage 函数（简化签名）。
+        /// 说明：向指定窗口发送一个消息。本程序中用于向窗体发送系统命令（如移动窗口）
+        /// 以模拟拖动无边框窗体的行为。
+        /// </summary>
+        /// <param name="hwnd">目标窗口句柄（窗口的 IntPtr）。</param>
+        /// <param name="wMsg">消息编号（例如 WM_SYSCOMMAND）。</param>
+        /// <param name="wParam">消息的第一个参数（例如系统命令和子参数）。</param>
+        /// <param name="lParam">消息的第二个参数（通常为坐标或额外信息）。</param>
+        /// <returns>通常返回消息处理结果，布尔值或依据具体消息而定。</returns>
         [DllImport("user32.dll")]
         public static extern bool SendMessage(IntPtr hwnd, int wMsg, int wParam, int lParam);
+
+        /// <summary>
+        /// 在 Windows 消息中表示“系统命令”消息（消息编号 0x0112）。
+        /// 与 SendMessage 配合使用以发送系统级命令（如最小化、最大化或移动）。
+        /// </summary>
         public const int WM_SYSCOMMAND = 0x0112;
+
+        /// <summary>
+        /// 系统命令的子项，表示移动窗口命令（0xF010）。
+        /// 通常与 WM_SYSCOMMAND 一起使用，配合 HTCAPTION 可以模拟拖动标题栏。
+        /// </summary>
         public const int SC_MOVE = 0xF010;
+
+        /// <summary>
+        /// 表示标题栏（caption）的命中测试值（0x0002）。
+        /// 与 SC_MOVE 一起使用时表示对标题栏的移动操作，从而让窗口开始移动。
+        /// </summary>
         public const int HTCAPTION = 0x0002;
-       
+
         private void InitializeTimer()
         {
             timers = new System.Timers.Timer();
@@ -51,97 +93,126 @@ namespace NetMonitor
             });
         }
 
-        /*        private void SetGifBackground()
-                {
-                    Image gif = Resource.Cat;
-                    System.Drawing.Imaging.FrameDimension fd = new System.Drawing.Imaging.FrameDimension(gif.FrameDimensionsList[0]);
-                    int count = gif.GetFrameCount(fd);    //获取帧数(gif图片可能包含多帧，其它格式图片一般仅一帧)
-                    System.Windows.Forms.Timer giftimer = new System.Windows.Forms.Timer();
-                    giftimer.Interval = 120;//这里是可以调节速度的
-                    int i = 0;
-                    Image bgImg = null;
-                    System.IO.Stream stream = new System.IO.MemoryStream();
-                    giftimer.Tick += (s, e) =>
-                    {
-                            if (i >= count)
-                            {
-                                i = 0;
-                            }
-                            gif.SelectActiveFrame(fd, i);
-                            gif.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                            if (bgImg != null)
-                            {
-                                bgImg.Dispose();
-                            }
-                            bgImg = Image.FromStream(stream);
-                            this.pictureBox.BackgroundImage = bgImg;///
-                            i++;
-                        Thread.Sleep(0);
-                    };
-                    giftimer.Start();
-                }*/
         private void SetGifBackground()
         {
+            // 保护：如果资源为空则直接返回
             Image gif = Properties.Resources.Cat;
-            System.Drawing.Imaging.FrameDimension fd = new System.Drawing.Imaging.FrameDimension(gif.FrameDimensionsList[0]);
-            int count = gif.GetFrameCount(fd);
-            System.Windows.Forms.Timer giftimer = new System.Windows.Forms.Timer();
-            giftimer.Interval = 120;
-            int i = 0;
-            Image bgImg = null;
-            System.IO.Stream stream = new System.IO.MemoryStream();
-            giftimer.Tick += (s, e) =>
+            if (gif == null) return;
+
+            // 释放旧资源（如果存在）
+            try
+            {
+                if (giftimer != null)
+                {
+                    giftimer.Stop();
+                    giftimer.Tick -= Giftimer_Tick;
+                    giftimer.Dispose();
+                    giftimer = null;
+                }
+            }
+            catch { }
+
+            try
+            {
+                // 提取帧
+                var fd = new System.Drawing.Imaging.FrameDimension(gif.FrameDimensionsList[0]);
+                gifFrameCount = gif.GetFrameCount(fd);
+                if (gifFrameCount <= 0) return;
+
+                // 释放旧帧数组（如果存在）
+                if (gifFrames != null)
+                {
+                    foreach (var img in gifFrames)
+                    {
+                        try { img?.Dispose(); } catch { }
+                    }
+                }
+
+                gifFrames = new Image[gifFrameCount];
+
+                // 复制每一帧为独立的 Bitmap（保持透明通道）
+                for (int i = 0; i < gifFrameCount; i++)
+                {
+                    gif.SelectActiveFrame(fd, i);
+
+                    // 创建支持 alpha 的位图并清空为透明色
+                    var bmp = new Bitmap(gif.Width, gif.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    using (var g = Graphics.FromImage(bmp))
+                    {
+                        g.Clear(Color.Transparent);
+
+                        // 保证正确的 alpha 合成并使用较高质量的绘制参数
+                        g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+                        g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                        g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                        g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+
+                        // 绘制当前帧到目标位图，保留透明信息
+                        g.DrawImage(gif, 0, 0, gif.Width, gif.Height);
+                    }
+
+                    gifFrames[i] = bmp;
+                }
+
+                // 配置计时器：使用 WinForms Timer 保证在 UI 线程执行
+                giftimer = new System.Windows.Forms.Timer();
+                // 使用较小间隔（约 60 FPS）并通过 gifStep 控制有效速度。
+                giftimer.Interval = 140; // ~60FPS
+                gifFrameIndex = 0;
+                if (gifStep < 1) gifStep = 1;
+
+                // 绑定单独方法，便于移除事件
+                giftimer.Tick += Giftimer_Tick;
+                giftimer.Start();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("SetGifBackground 错误: " + ex.Message);
+            }
+        }
+
+        private void Giftimer_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                if (gifFrames == null || gifFrameCount == 0) return;
+
+                gifFrameIndex = (gifFrameIndex + gifStep) % gifFrameCount;
+                var frame = gifFrames[gifFrameIndex];
+
+                if (this.pictureBox.InvokeRequired)
+                {
+                    this.pictureBox.Invoke(new Action(() => this.pictureBox.BackgroundImage = frame));
+                }
+                else
+                {
+                    this.pictureBox.BackgroundImage = frame;
+                }
+            }
+            catch (Exception ex)
             {
                 try
                 {
-                    if (i >= count)
-                    {
-                        i = 0;
-                    }
-                    gif.SelectActiveFrame(fd, i);
-                    stream.SetLength(0); // Clear the stream
-                    gif.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                    stream.Seek(0, System.IO.SeekOrigin.Begin); // Reset the stream position
-                    if (bgImg != null)
-                    {
-                        bgImg.Dispose();
-                    }
-                    bgImg = Image.FromStream(stream);
-                    if (this.pictureBox.InvokeRequired)
-                    {
-                        this.pictureBox.Invoke(new Action(() => this.pictureBox.BackgroundImage = bgImg));
-                    }
-                    else
-                    {
-                        this.pictureBox.BackgroundImage = bgImg;
-                    }
-                    i++;
+                    giftimer?.Stop();
                 }
-                catch (Exception ex)
-                {
-                    // Handle the exception, e.g., log it or stop the timer
-                    giftimer.Stop();
-                    Console.WriteLine("An error occurred: " + ex.Message);
-                }
-            };
-            giftimer.Start();
+                catch { }
+                Console.WriteLine("GIF 播放错误: " + ex.Message);
+            }
         }
 
         public void UpdateNetworkInterface()
         {
-            long netSend;
-            long netRecv;
-            if (ComboBox.Owner.InvokeRequired)
+            // 确保在 UI 线程执行
+            if (this.InvokeRequired)
             {
-                ComboBox.Owner.Invoke(new Action(UpdateNetworkInterface));
+                this.Invoke(new Action(UpdateNetworkInterface));
                 return;
             }
 
             if (nicArr == null || nicArr.Length == 0)
             {
-                // 没有网卡可用，清空显示并返回
-                Lable_TotalUP.Text = "0";
-                Lable_TotalDown.Text = "0";
+                prevBytesSent = 0;
+                prevBytesRecv = 0;
                 Lable_SpeedUP.Text = "上传：0B/S";
                 Lable_SpeedDown.Text = "下载：0B/S";
                 return;
@@ -149,41 +220,74 @@ namespace NetMonitor
 
             if (ComboBox.SelectedIndex >= 0 && ComboBox.SelectedIndex < nicArr.Length)
             {
-                NetworkInterface nic = nicArr[ComboBox.SelectedIndex];
-                // 获取 IPv4 统计
-                IPv4InterfaceStatistics interfaceStats = nic.GetIPv4Statistics();
-                if (InterfaceSelect == ComboBox.SelectedIndex && Start)
+                var nic = nicArr[ComboBox.SelectedIndex];
+                var stats = nic.GetIPv4Statistics();
+                long bytesSent = stats.BytesSent;
+                long bytesRecv = stats.BytesReceived;
+
+                long netSend = 0;
+                long netRecv = 0;
+
+                if (Start && InterfaceSelect == ComboBox.SelectedIndex)
                 {
-                    netSend = interfaceStats.BytesSent - long.Parse(Lable_TotalUP.Text);
-                    netRecv = interfaceStats.BytesReceived - long.Parse(Lable_TotalDown.Text);
-                    Lable_TotalUP.Text = interfaceStats.BytesSent.ToString();
-                    Lable_TotalDown.Text = interfaceStats.BytesReceived.ToString();
-                    System.Diagnostics.Debug.WriteLine(ComboBox.SelectedIndex.ToString());
-                    if (netRecv == 0 && netSend == 0)
-                    {
-                        ZreoTimes++;
-                    }
-                    else
-                    {
-                        ZreoTimes = 0;
-                    }
-                    if (ZreoTimes >= 3)
-                    {
-                        ComboBox.SelectedIndex = (ComboBox.SelectedIndex + 1) % nicArr.Length;
-                    }
+                    // 使用 long 字段保存上一次值，避免依赖 UI 控件文本
+                    netSend = bytesSent - prevBytesSent;
+                    netRecv = bytesRecv - prevBytesRecv;
                 }
                 else
                 {
+                    // 切换网卡或首次启动：不计算差值，只初始化前一次值
+                    Start = true;
+                    InterfaceSelect = ComboBox.SelectedIndex;
                     netSend = 0;
                     netRecv = 0;
-                    Lable_TotalUP.Text = interfaceStats.BytesSent.ToString();
-                    Lable_TotalDown.Text = interfaceStats.BytesReceived.ToString();
-                    InterfaceSelect = ComboBox.SelectedIndex;
-                    Start = !Start;
                 }
 
+                // 更新“前一次”值（用于下一次差值计算）
+                prevBytesSent = bytesSent;
+                prevBytesRecv = bytesRecv;
+
+                // 根据当前下载速度（bytes/s）调整 gifStep
+                // 1MB = 1024 * 1024 bytes
+                const long OneMB = 1024 * 1024;
+                try
+                {
+                    if (netRecv < OneMB)
+                    {
+                        gifStep = 1;
+                    }
+                    else if (netRecv < 10 * OneMB)
+                    {
+                        gifStep = 2;
+                    }
+                    else
+                    {
+                        gifStep = 4;
+                    }
+
+                    if (gifStep < 1) gifStep = 1;
+                }
+                catch
+                {
+                    // 避免任何异常影响主流程，保留当前 gifStep
+                }
+
+                // 更新 UI
                 Lable_SpeedUP.Text = "上传：" + FormatSpeed(netSend);
                 Lable_SpeedDown.Text = "下载：" + FormatSpeed(netRecv);
+
+                if (netRecv == 0 && netSend == 0)
+                {
+                    ZreoTimes++;
+                }
+                else
+                {
+                    ZreoTimes = 0;
+                }
+                if (ZreoTimes >= 3)
+                {
+                    ComboBox.SelectedIndex = (ComboBox.SelectedIndex + 1) % nicArr.Length;
+                }
             }
         }
 
@@ -195,7 +299,7 @@ namespace NetMonitor
             }
             else if (bytes < 1024 * 1024)
             {
-                return $"{(bytes / 1024.0):F2}K/S";
+                return $"{(bytes / 1024.0):F0}K/S";
             }
             else
             {
@@ -312,6 +416,7 @@ namespace NetMonitor
             if (this.panel != null) this.panel.BackColor = accent;
             if (this.Lable_SpeedUP != null) this.Lable_SpeedUP.BackColor = accent;
             if (this.Lable_SpeedDown != null) this.Lable_SpeedDown.BackColor = accent;
+            //cat 版本的代码此处如果恢复注意修改颜色和panel的背景图片
 
             this.Invoke((EventHandler)delegate
             {
