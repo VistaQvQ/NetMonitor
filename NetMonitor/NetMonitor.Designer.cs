@@ -56,7 +56,7 @@
             this.Menu.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
             this.Menu.Name = "contextMenuStrip1";
             this.Menu.ShowImageMargin = false;
-            this.Menu.Size = new System.Drawing.Size(100, 74);
+            this.Menu.Size = new System.Drawing.Size(144, 74);
             // 
             // Interface_Menu
             // 
@@ -65,7 +65,7 @@
             this.Interface_Menu.MergeIndex = 0;
             this.Interface_Menu.Name = "Interface_Menu";
             this.Interface_Menu.Padding = new System.Windows.Forms.Padding(0);
-            this.Interface_Menu.Size = new System.Drawing.Size(99, 20);
+            this.Interface_Menu.Size = new System.Drawing.Size(143, 20);
             this.Interface_Menu.Text = "网卡选择";
             // 
             // ComboBox
@@ -80,16 +80,15 @@
             // 
             this.toolStripSeparator.ForeColor = System.Drawing.Color.Black;
             this.toolStripSeparator.Name = "toolStripSeparator";
-            this.toolStripSeparator.Size = new System.Drawing.Size(96, 6);
+            this.toolStripSeparator.Size = new System.Drawing.Size(140, 6);
             // 
             // AutoRun_ToolStripMenuItem
             // 
-            this.AutoRun_ToolStripMenuItem.Checked = true;
             this.AutoRun_ToolStripMenuItem.CheckOnClick = true;
-            this.AutoRun_ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.AutoRun_ToolStripMenuItem.Name = "AutoRun_ToolStripMenuItem";
-            this.AutoRun_ToolStripMenuItem.Size = new System.Drawing.Size(99, 22);
-            this.AutoRun_ToolStripMenuItem.Text = "开机启动";
+            this.AutoRun_ToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
+            this.AutoRun_ToolStripMenuItem.Text = "开机自启(已禁用)";
+            this.AutoRun_ToolStripMenuItem.Click += new System.EventHandler(this.AutoRun_ToolStripMenuItem_Click);
             // 
             // Exit_Menu
             // 
@@ -99,7 +98,7 @@
             this.Exit_Menu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.Exit_Menu.MergeIndex = 0;
             this.Exit_Menu.Name = "Exit_Menu";
-            this.Exit_Menu.Size = new System.Drawing.Size(99, 22);
+            this.Exit_Menu.Size = new System.Drawing.Size(143, 22);
             this.Exit_Menu.Text = "退出";
             this.Exit_Menu.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Exit_Menu_MouseDown);
             // 

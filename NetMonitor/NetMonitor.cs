@@ -15,7 +15,7 @@ namespace NetMonitor
         int ZreoTimes = 0;
         bool Start = false;
         private NetworkInterface[] nicArr;      //网卡集合
-        private System.Timers.Timer timers; 
+        private System.Timers.Timer timers;
 
         //计时器
         private System.Windows.Forms.Timer giftimer;
@@ -23,12 +23,12 @@ namespace NetMonitor
         private int gifFrameIndex = 0;
         private int gifFrameCount = 0;
         // 可调整：1 = 原始帧率（更慢），2 = 中速，4 = 较快（默认）
-        private int gifStep = 1; 
+        private int gifStep = 1;
 
         // 新增字段（类级别）
         private long prevBytesSent = 0;
         private long prevBytesRecv = 0;
-        
+
         public NetMonitor()
         {
             InitializeComponent();
@@ -36,46 +36,46 @@ namespace NetMonitor
             InitializeTimer();
         }
 
-/// <summary>
-/// 从 user32.dll 导入 ReleaseCapture 函数。
-/// 说明：释放当前窗口对鼠标的捕获。常用于在自定义窗体标题栏或无边框窗体中实现拖动功能时，
-/// 在开始发送移动消息之前释放系统对鼠标的捕获，以便后续通过 SendMessage 模拟系统移动窗口的行为。
-/// </summary>
-/// <returns>如果成功返回 true，否则返回 false。</returns>
-[DllImport("user32.dll")]
-public static extern bool ReleaseCapture();
+        /// <summary>
+        /// 从 user32.dll 导入 ReleaseCapture 函数。
+        /// 说明：释放当前窗口对鼠标的捕获。常用于在自定义窗体标题栏或无边框窗体中实现拖动功能时，
+        /// 在开始发送移动消息之前释放系统对鼠标的捕获，以便后续通过 SendMessage 模拟系统移动窗口的行为。
+        /// </summary>
+        /// <returns>如果成功返回 true，否则返回 false。</returns>
+        [DllImport("user32.dll")]
+        public static extern bool ReleaseCapture();
 
-/// <summary>
-/// 从 user32.dll 导入 SendMessage 函数（简化签名）。
-/// 说明：向指定窗口发送一个消息。本程序中用于向窗体发送系统命令（如移动窗口）
-/// 以模拟拖动无边框窗体的行为。
-/// </summary>
-/// <param name="hwnd">目标窗口句柄（窗口的 IntPtr）。</param>
-/// <param name="wMsg">消息编号（例如 WM_SYSCOMMAND）。</param>
-/// <param name="wParam">消息的第一个参数（例如系统命令和子参数）。</param>
-/// <param name="lParam">消息的第二个参数（通常为坐标或额外信息）。</param>
-/// <returns>通常返回消息处理结果，布尔值或依据具体消息而定。</returns>
-[DllImport("user32.dll")]
-public static extern bool SendMessage(IntPtr hwnd, int wMsg, int wParam, int lParam);
+        /// <summary>
+        /// 从 user32.dll 导入 SendMessage 函数（简化签名）。
+        /// 说明：向指定窗口发送一个消息。本程序中用于向窗体发送系统命令（如移动窗口）
+        /// 以模拟拖动无边框窗体的行为。
+        /// </summary>
+        /// <param name="hwnd">目标窗口句柄（窗口的 IntPtr）。</param>
+        /// <param name="wMsg">消息编号（例如 WM_SYSCOMMAND）。</param>
+        /// <param name="wParam">消息的第一个参数（例如系统命令和子参数）。</param>
+        /// <param name="lParam">消息的第二个参数（通常为坐标或额外信息）。</param>
+        /// <returns>通常返回消息处理结果，布尔值或依据具体消息而定。</returns>
+        [DllImport("user32.dll")]
+        public static extern bool SendMessage(IntPtr hwnd, int wMsg, int wParam, int lParam);
 
-/// <summary>
-/// 在 Windows 消息中表示“系统命令”消息（消息编号 0x0112）。
-/// 与 SendMessage 配合使用以发送系统级命令（如最小化、最大化或移动）。
-/// </summary>
-public const int WM_SYSCOMMAND = 0x0112;
+        /// <summary>
+        /// 在 Windows 消息中表示“系统命令”消息（消息编号 0x0112）。
+        /// 与 SendMessage 配合使用以发送系统级命令（如最小化、最大化或移动）。
+        /// </summary>
+        public const int WM_SYSCOMMAND = 0x0112;
 
-/// <summary>
-/// 系统命令的子项，表示移动窗口命令（0xF010）。
-/// 通常与 WM_SYSCOMMAND 一起使用，配合 HTCAPTION 可以模拟拖动标题栏。
-/// </summary>
-public const int SC_MOVE = 0xF010;
+        /// <summary>
+        /// 系统命令的子项，表示移动窗口命令（0xF010）。
+        /// 通常与 WM_SYSCOMMAND 一起使用，配合 HTCAPTION 可以模拟拖动标题栏。
+        /// </summary>
+        public const int SC_MOVE = 0xF010;
 
-/// <summary>
-/// 表示标题栏（caption）的命中测试值（0x0002）。
-/// 与 SC_MOVE 一起使用时表示对标题栏的移动操作，从而让窗口开始移动。
-/// </summary>
-public const int HTCAPTION = 0x0002;
-       
+        /// <summary>
+        /// 表示标题栏（caption）的命中测试值（0x0002）。
+        /// 与 SC_MOVE 一起使用时表示对标题栏的移动操作，从而让窗口开始移动。
+        /// </summary>
+        public const int HTCAPTION = 0x0002;
+
         private void InitializeTimer()
         {
             timers = new System.Timers.Timer();
@@ -447,6 +447,19 @@ public const int HTCAPTION = 0x0002;
         private void ComboBox_DropDownClosed(object sender, EventArgs e)
         {
             Menu.Hide();
+        }
+
+        private void AutoRun_ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //this.AutoRun_ToolStripMenuItem.Checked = !this.AutoRun_ToolStripMenuItem.Checked;
+            if (this.AutoRun_ToolStripMenuItem.Checked)
+            {
+                this.AutoRun_ToolStripMenuItem.Text = "开机自启(已启用)";
+            }
+            else
+            {
+                this.AutoRun_ToolStripMenuItem.Text = "开机自启(已禁用)";
+            }
         }
     }
 }
