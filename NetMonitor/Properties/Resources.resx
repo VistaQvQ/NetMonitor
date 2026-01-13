@@ -375,8 +375,19 @@
         NS6U5ZaZIqPpqsseu+3+6Va84X5Kb1Pz3lsvtvruC2+/GQUEADs=
 </value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="img_background" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\img_background.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="img_background" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAAMEAAAA4CAYAAABE35xNAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
+        YQUAAAAZdEVYdFNvZnR3YXJlAEFkb2JlIEltYWdlUmVhZHlxyWU8AAACCklEQVR4Xu2Vy47CQAwE8/8/
+        ndXMgQxtb5SHFDLuKqk4OMDB7YZlXdcFj7ssS3vBH6qZ3DUMMKoh4HvUrK4YBripC1fhOXT3qmZ3xjDA
+        /eOH36OZ3C1DGDirC+Xw349mdaUIYeCqLpLjnwvN7kwZwsBRXR4FmBPN8GgRwsDNZGkwOUmmIfevG9CB
+        k8myoAhJtiH/zx3owMVkSVCMJONwB/1tOnAwWQ4UJck63oMOHKQAXlACkQJ4sleEcCSVTf4awYQk++0u
+        9FAqSwG8sS8BBYBGVoRwLFWlBNCwLQEFgBEtQjiYilICGKEEYI9dCSgAZIx3EY6mmpQAMigB2GNZAgCF
+        EoA9lADsoQRgDyUAeygB2EMJwB5KAPZQArCHEoA9diWgCDAy3kU4mmpSAsigBGCPVQmaFAFG5B76a3kp
+        AYxQArDHsgRNigANLUAf6bFUlRJAw7oETYrgTVaAPtZDqey4BIrgRZL9dhd6KNWlBJ78V4D+SAfVTX4R
+        oDh7BeiPdeAgRfAhyTregw5cTJYDxUgyDnfQ36YDJ5MlQRGSbEP+nzvQgZvJsmBykkxD7l83oANHdWmU
+        YU40wyMF6B/Tgau6PIowF5rd0QL0j+rAXV0kZXg3mtWZ4/9krgPMi0Ah3oNmcqcA/et0gJu6YBWeQ3ev
+        anZnDAOM6sLxPWpWVwwD3FdDwOfVTO76B1n5xyEwKSp4AAAAAElFTkSuQmCC
+</value>
   </data>
 </root>

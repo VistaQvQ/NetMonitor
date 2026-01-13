@@ -6,8 +6,8 @@
 *.sln.docstates
 
 # 构建输出
-[Bb]in/
-[Oo]bj/
+NetMonitor/[Bb]in/
+NetMonitor/[Oo]bj/
 
 # NuGet 包目录
 packages/
