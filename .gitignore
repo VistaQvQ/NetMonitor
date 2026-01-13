@@ -1,0 +1,44 @@
+# Visual Studio 用户特定文件
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# 构建输出
+NetMonitor/[Bb]in/
+NetMonitor/[Oo]bj/
+
+# NuGet 包目录
+packages/
+
+# 编译中间文件
+*.cache
+*.pch
+
+# Visual Studio 临时文件
+_ReSharper.*/
+*.resharper
+[Tt]humbs.db
+
+# Windows 项目文件
+*.csproj.user
+*.vbproj.user
+
+# 应用程序特定文件
+appsettings.json
+appsettings.*.json
+
+# 发布输出
+publish/
+
+# 调试文件
+*.pdb
+*.idb
+*.ilk
+
+# 其他
+*.log
+*.tmp
+*.temp
+.DS_Store
