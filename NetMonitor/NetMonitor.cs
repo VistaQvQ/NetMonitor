@@ -6,6 +6,7 @@ using System.Timers;
 using System.Windows.Forms;
 using System.Threading;
 using System.Linq;
+using System.Diagnostics;
 
 namespace NetMonitor
 {
@@ -34,6 +35,7 @@ namespace NetMonitor
             InitializeComponent();
             InitNetworkInterface();
             InitializeTimer();
+            InitAutoRunMenuItem();
         }
 
         /// <summary>
@@ -451,15 +453,107 @@ namespace NetMonitor
 
         private void AutoRun_ToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //this.AutoRun_ToolStripMenuItem.Checked = !this.AutoRun_ToolStripMenuItem.Checked;
-            if (this.AutoRun_ToolStripMenuItem.Checked)
+            if (!CheckProgramNameNotChanged())
             {
+                return;
+            }
+            else
+            {
+                this.SetAutoRun(this.AutoRun_ToolStripMenuItem.Checked);
+                this.AutoRun_ToolStripMenuItem.Text = this.AutoRun_ToolStripMenuItem.Checked ? "开机自启(已启用)" : "开机自启(已禁用)";
+
+            }
+        }
+        private bool SetAutoRun(bool enable)
+        {
+            try
+            {
+                string runKey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
+                using (var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(runKey, true))
+                {
+                    if (enable)
+                    {
+                        key.SetValue("NetMonitor", Application.ExecutablePath);
+                    }
+                    else
+                    {
+                        key.DeleteValue("NetMonitor", false);
+                    }
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("设置开机自启失败: " + ex.Message);
+                return false;
+            }
+        }
+        private bool GetAutoRun()
+        {
+            try
+            {
+                string runKey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
+                using (var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(runKey, false))
+                {
+                    var value = key.GetValue("NetMonitor");
+                    if (value != null && value.ToString() == Application.ExecutablePath)
+                    {
+                        return true;
+                    }
+                }
+            }
+            catch
+            {
+                // 忽略异常，默认为未启用
+            }
+            return false;
+        }
+        private bool CheckProgramNameAndPathNotChanged()
+        {
+            try
+            {
+                string expectedPath = Application.ExecutablePath;
+                string runKey = "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run";
+                using (var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(runKey, false))
+                {
+                    var value = key.GetValue("NetMonitor");
+                    if (value != null && value.ToString() != expectedPath)
+                    {
+                        MessageBox.Show("程序名称或路径已被修改,请重新设定开机自启！。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return false;
+                    }
+                }
+            }
+            catch
+            {
+                // 忽略异常，继续执行
+            }
+            return true;
+        }
+        private void InitAutoRunMenuItem()
+        {
+            if (this.GetAutoRun() && this.CheckProgramNameAndPathNotChanged())
+            {
+                this.AutoRun_ToolStripMenuItem.Checked = true;
                 this.AutoRun_ToolStripMenuItem.Text = "开机自启(已启用)";
             }
             else
             {
+                this.AutoRun_ToolStripMenuItem.Checked = false;
                 this.AutoRun_ToolStripMenuItem.Text = "开机自启(已禁用)";
+                this.SetAutoRun(false);
             }
         }
+        private bool CheckProgramNameNotChanged()
+        {
+            string processName = Process.GetCurrentProcess().ProcessName;
+            if (processName != "NetMonitor")
+            {
+                MessageBox.Show("程序名称已被修改,请恢复原名称后再试！。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            return true;
+        }
     }
+
 }
