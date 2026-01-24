@@ -56,7 +56,7 @@
             this.Menu.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
             this.Menu.Name = "contextMenuStrip1";
             this.Menu.ShowImageMargin = false;
-            this.Menu.Size = new System.Drawing.Size(156, 96);
+            this.Menu.Size = new System.Drawing.Size(144, 74);
             // 
             // Interface_Menu
             // 
@@ -65,7 +65,7 @@
             this.Interface_Menu.MergeIndex = 0;
             this.Interface_Menu.Name = "Interface_Menu";
             this.Interface_Menu.Padding = new System.Windows.Forms.Padding(0);
-            this.Interface_Menu.Size = new System.Drawing.Size(155, 20);
+            this.Interface_Menu.Size = new System.Drawing.Size(143, 20);
             this.Interface_Menu.Text = "网卡选择";
             // 
             // ComboBox
@@ -80,13 +80,13 @@
             // 
             this.toolStripSeparator.ForeColor = System.Drawing.Color.Black;
             this.toolStripSeparator.Name = "toolStripSeparator";
-            this.toolStripSeparator.Size = new System.Drawing.Size(152, 6);
+            this.toolStripSeparator.Size = new System.Drawing.Size(140, 6);
             // 
             // AutoRun_ToolStripMenuItem
             // 
             this.AutoRun_ToolStripMenuItem.CheckOnClick = true;
             this.AutoRun_ToolStripMenuItem.Name = "AutoRun_ToolStripMenuItem";
-            this.AutoRun_ToolStripMenuItem.Size = new System.Drawing.Size(155, 22);
+            this.AutoRun_ToolStripMenuItem.Size = new System.Drawing.Size(143, 22);
             this.AutoRun_ToolStripMenuItem.Text = "开机自启(已禁用)";
             this.AutoRun_ToolStripMenuItem.Click += new System.EventHandler(this.AutoRun_ToolStripMenuItem_Click);
             // 
@@ -98,7 +98,7 @@
             this.Exit_Menu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.Exit_Menu.MergeIndex = 0;
             this.Exit_Menu.Name = "Exit_Menu";
-            this.Exit_Menu.Size = new System.Drawing.Size(155, 22);
+            this.Exit_Menu.Size = new System.Drawing.Size(143, 22);
             this.Exit_Menu.Text = "退出";
             this.Exit_Menu.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Exit_Menu_MouseDown);
             // 
@@ -127,9 +127,9 @@
             this.Lable_SpeedUP.ForeColor = System.Drawing.Color.Black;
             this.Lable_SpeedUP.Location = new System.Drawing.Point(66, 9);
             this.Lable_SpeedUP.Name = "Lable_SpeedUP";
-            this.Lable_SpeedUP.Size = new System.Drawing.Size(84, 14);
+            this.Lable_SpeedUP.Size = new System.Drawing.Size(100, 14);
             this.Lable_SpeedUP.TabIndex = 0;
-            this.Lable_SpeedUP.Text = "上传：0B/S";
+            this.Lable_SpeedUP.Text = "上传：  0B/S";
             this.Lable_SpeedUP.MouseDown += new System.Windows.Forms.MouseEventHandler(this.NetMonitor_MouseDown);
             // 
             // pictureBox
@@ -154,9 +154,9 @@
             this.Lable_SpeedDown.ForeColor = System.Drawing.Color.Black;
             this.Lable_SpeedDown.Location = new System.Drawing.Point(66, 33);
             this.Lable_SpeedDown.Name = "Lable_SpeedDown";
-            this.Lable_SpeedDown.Size = new System.Drawing.Size(84, 14);
+            this.Lable_SpeedDown.Size = new System.Drawing.Size(100, 14);
             this.Lable_SpeedDown.TabIndex = 1;
-            this.Lable_SpeedDown.Text = "下载：0B/S";
+            this.Lable_SpeedDown.Text = "下载：  0B/S";
             this.Lable_SpeedDown.MouseDown += new System.Windows.Forms.MouseEventHandler(this.NetMonitor_MouseDown);
             // 
             // NetMonitor
