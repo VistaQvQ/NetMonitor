@@ -215,8 +215,8 @@ namespace NetMonitor
             {
                 prevBytesSent = 0;
                 prevBytesRecv = 0;
-                Lable_SpeedUP.Text = "上传：0B/S";
-                Lable_SpeedDown.Text = "下载：0B/S";
+                Lable_SpeedUP.Text = "上传：  0B/S";
+                Lable_SpeedDown.Text = "下载：  0B/S";
                 return;
             }
 
@@ -295,17 +295,17 @@ namespace NetMonitor
 
         private string FormatSpeed(long bytes)
         {
-            if (bytes < 1024)
+            if (bytes < 1000)//处于1000~1024b之间显示时这里分母改成1000
             {
-                return $"{bytes}B/S";
+                return $"{bytes,3}B/S";
             }
-            else if (bytes < 1024 * 1024)
+            else if (bytes < 1024 * 1000)
             {
-                return $"{(bytes / 1024.0):F0}K/S";
+                return $"{(bytes / 1024.0),3:F0}K/S";
             }
             else
             {
-                return $"{(bytes / (1024.0 * 1024)):F2}M/S";
+                return $"{(bytes / (1024.0 * 1000)),3:F0}M/S";
             }
         }
 
