@@ -29,13 +29,17 @@ namespace NetMonitor
         // 新增字段（类级别）
         private long prevBytesSent = 0;
         private long prevBytesRecv = 0;
+        // 记录上次采样时间，用于按真实时间计算速度（秒）
+        private DateTime prevSampleTime = DateTime.MinValue;
 
         public NetMonitor()
         {
             InitializeComponent();
             InitNetworkInterface();
             InitializeTimer();
+#if !DEBUG
             InitAutoRunMenuItem();
+#endif
         }
 
         /// <summary>
@@ -88,11 +92,19 @@ namespace NetMonitor
 
         void timer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            this.Invoke((EventHandler)delegate
+            // 非阻塞地将更新请求排入 UI 消息队列，避免在计时器线程上同步等待 UI
+            if (this.IsHandleCreated && !this.IsDisposed)
             {
-                UpdateNetworkInterface();
-                Thread.Sleep(0);
-            });
+                try
+                {
+                    this.BeginInvoke((Action)UpdateNetworkInterface);
+                }
+                catch (InvalidOperationException)
+                {
+                    // 窗体已被关闭或句柄不可用，忽略
+                }
+
+            }
         }
 
         private void SetGifBackground()
@@ -182,14 +194,9 @@ namespace NetMonitor
                 gifFrameIndex = (gifFrameIndex + gifStep) % gifFrameCount;
                 var frame = gifFrames[gifFrameIndex];
 
-                if (this.pictureBox.InvokeRequired)
-                {
-                    this.pictureBox.Invoke(new Action(() => this.pictureBox.BackgroundImage = frame));
-                }
-                else
-                {
-                    this.pictureBox.BackgroundImage = frame;
-                }
+                // giftimer 是 WinForms Timer，在 UI 线程触发，直接更新即可。
+                // 保留异常保护，防止单帧导致整体停止。
+                this.pictureBox.BackgroundImage = frame;
             }
             catch (Exception ex)
             {
@@ -207,9 +214,20 @@ namespace NetMonitor
             // 确保在 UI 线程执行
             if (this.InvokeRequired)
             {
-                this.Invoke(new Action(UpdateNetworkInterface));
+                // 使用 BeginInvoke 以避免阻塞调用线程（和计时器线程）
+                this.BeginInvoke(new Action(UpdateNetworkInterface));
                 return;
             }
+
+            var now = DateTime.UtcNow;
+            double deltaSeconds = 1.0; // 默认 1s，适用于首次采样或回退情况
+
+            if (prevSampleTime != DateTime.MinValue)
+            {
+                deltaSeconds = (now - prevSampleTime).TotalSeconds;
+                if (deltaSeconds <= 0) deltaSeconds = 1.0;
+            }
+            prevSampleTime = now;
 
             if (nicArr == null || nicArr.Length == 0)
             {
@@ -227,38 +245,40 @@ namespace NetMonitor
                 long bytesSent = stats.BytesSent;
                 long bytesRecv = stats.BytesReceived;
 
-                long netSend = 0;
-                long netRecv = 0;
+                long deltaSent = 0;
+                long deltaRecv = 0;
 
                 if (Start && InterfaceSelect == ComboBox.SelectedIndex)
                 {
-                    // 使用 long 字段保存上一次值，避免依赖 UI 控件文本
-                    netSend = bytesSent - prevBytesSent;
-                    netRecv = bytesRecv - prevBytesRecv;
+                    deltaSent = bytesSent - prevBytesSent;
+                    deltaRecv = bytesRecv - prevBytesRecv;
                 }
                 else
                 {
-                    // 切换网卡或首次启动：不计算差值，只初始化前一次值
+                    // 切换网卡或首次启动：初始化，上次值设为当前值，避免突跳
                     Start = true;
                     InterfaceSelect = ComboBox.SelectedIndex;
-                    netSend = 0;
-                    netRecv = 0;
+                    deltaSent = 0;
+                    deltaRecv = 0;
                 }
 
                 // 更新“前一次”值（用于下一次差值计算）
                 prevBytesSent = bytesSent;
                 prevBytesRecv = bytesRecv;
 
+                // 将 delta 转为 字节/秒，按真实时间间隔计算，避免 BeginInvoke / UI 延迟导致误差
+                long netSendPerSec = (long)(deltaSent / deltaSeconds);
+                long netRecvPerSec = (long)(deltaRecv / deltaSeconds);
+
                 // 根据当前下载速度（bytes/s）调整 gifStep
-                // 1MB = 1024 * 1024 bytes
                 const long OneMB = 1024 * 1024;
                 try
                 {
-                    if (netRecv < OneMB)
+                    if (netRecvPerSec < OneMB)
                     {
                         gifStep = 1;
                     }
-                    else if (netRecv < 10 * OneMB)
+                    else if (netRecvPerSec < 10 * OneMB)
                     {
                         gifStep = 2;
                     }
@@ -274,11 +294,11 @@ namespace NetMonitor
                     // 避免任何异常影响主流程，保留当前 gifStep
                 }
 
-                // 更新 UI
-                Lable_SpeedUP.Text = "上传：" + FormatSpeed(netSend);
-                Lable_SpeedDown.Text = "下载：" + FormatSpeed(netRecv);
+                // 更新 UI：使用按秒速率显示
+                Lable_SpeedUP.Text = "上传：" + FormatSpeed(netSendPerSec);
+                Lable_SpeedDown.Text = "下载：" + FormatSpeed(netRecvPerSec);
 
-                if (netRecv == 0 && netSend == 0)
+                if (netRecvPerSec == 0 && netSendPerSec == 0)
                 {
                     ZreoTimes++;
                 }
