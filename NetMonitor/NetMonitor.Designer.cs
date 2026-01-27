@@ -49,7 +49,6 @@
             // 
             // Menu
             // 
-            resources.ApplyResources(this.Menu, "Menu");
             this.Menu.AllowMerge = false;
             this.Menu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.Interface_Menu,
@@ -60,52 +59,51 @@
             this.Menu.Name = "contextMenuStrip1";
             this.Menu.ShowCheckMargin = true;
             this.Menu.ShowImageMargin = false;
+            resources.ApplyResources(this.Menu, "Menu");
             // 
             // Interface_Menu
             // 
-            resources.ApplyResources(this.Interface_Menu, "Interface_Menu");
             this.Interface_Menu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.ComboBox});
             this.Interface_Menu.MergeIndex = 0;
             this.Interface_Menu.Name = "Interface_Menu";
             this.Interface_Menu.Padding = new System.Windows.Forms.Padding(0);
+            resources.ApplyResources(this.Interface_Menu, "Interface_Menu");
             // 
             // ComboBox
             // 
-            resources.ApplyResources(this.ComboBox, "ComboBox");
             this.ComboBox.DropDownWidth = 70;
+            resources.ApplyResources(this.ComboBox, "ComboBox");
             this.ComboBox.Name = "ComboBox";
             this.ComboBox.DropDownClosed += new System.EventHandler(this.ComboBox_DropDownClosed);
             // 
             // toolStripSeparator
             // 
-            resources.ApplyResources(this.toolStripSeparator, "toolStripSeparator");
             this.toolStripSeparator.ForeColor = System.Drawing.Color.Black;
             this.toolStripSeparator.Name = "toolStripSeparator";
+            resources.ApplyResources(this.toolStripSeparator, "toolStripSeparator");
             // 
             // AutoRun_ToolStripMenuItem
             // 
-            resources.ApplyResources(this.AutoRun_ToolStripMenuItem, "AutoRun_ToolStripMenuItem");
-            this.AutoRun_ToolStripMenuItem.Checked = true;
             this.AutoRun_ToolStripMenuItem.CheckOnClick = true;
-            this.AutoRun_ToolStripMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
             this.AutoRun_ToolStripMenuItem.Name = "AutoRun_ToolStripMenuItem";
+            resources.ApplyResources(this.AutoRun_ToolStripMenuItem, "AutoRun_ToolStripMenuItem");
             this.AutoRun_ToolStripMenuItem.Click += new System.EventHandler(this.AutoRun_ToolStripMenuItem_Click);
             // 
             // Exit_Menu
             // 
-            resources.ApplyResources(this.Exit_Menu, "Exit_Menu");
             this.Exit_Menu.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.Exit_Menu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.Exit_Menu.MergeIndex = 0;
             this.Exit_Menu.Name = "Exit_Menu";
+            resources.ApplyResources(this.Exit_Menu, "Exit_Menu");
             this.Exit_Menu.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Exit_Menu_MouseDown);
             // 
             // panel
             // 
-            resources.ApplyResources(this.panel, "panel");
             this.panel.BackColor = System.Drawing.SystemColors.Control;
             this.panel.BackgroundImage = global::NetMonitor.Properties.Resources.img_background;
+            resources.ApplyResources(this.panel, "panel");
             this.panel.ContextMenuStrip = this.Menu;
             this.panel.Controls.Add(this.Lable_SpeedDown);
             this.panel.Controls.Add(this.Lable_SpeedUP);
@@ -151,8 +149,8 @@
             // 
             // pictureBox
             // 
-            resources.ApplyResources(this.pictureBox, "pictureBox");
             this.pictureBox.BackColor = System.Drawing.Color.Transparent;
+            resources.ApplyResources(this.pictureBox, "pictureBox");
             this.pictureBox.ContextMenuStrip = this.Menu;
             this.pictureBox.Name = "pictureBox";
             this.pictureBox.TabStop = false;
