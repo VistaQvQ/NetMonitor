@@ -233,8 +233,8 @@ namespace NetMonitor
             {
                 prevBytesSent = 0;
                 prevBytesRecv = 0;
-                Lable_SpeedUP.Text = "上传：  0B/S";
-                Lable_SpeedDown.Text = "下载：  0B/S";
+                Lable_SpeedUP.Text = "  0B/S";
+                Lable_SpeedDown.Text = "  0B/S";
                 return;
             }
 
@@ -295,20 +295,26 @@ namespace NetMonitor
                 }
 
                 // 更新 UI：使用按秒速率显示
-                Lable_SpeedUP.Text = "上传：" + FormatSpeed(netSendPerSec);
-                Lable_SpeedDown.Text = "下载：" + FormatSpeed(netRecvPerSec);
-
-                if (netRecvPerSec == 0 && netSendPerSec == 0)
+                Lable_SpeedUP.Text = FormatSpeed(netSendPerSec);
+                Lable_SpeedDown.Text = FormatSpeed(netRecvPerSec);
+                if (ComboBox.Text == "无可用网络接口")//这里仍然有可能出现无网卡的情况，需要修补
                 {
-                    ZreoTimes++;
+                    InitNetworkInterface();
                 }
                 else
                 {
-                    ZreoTimes = 0;
-                }
-                if (ZreoTimes >= 3)
-                {
-                    ComboBox.SelectedIndex = (ComboBox.SelectedIndex + 1) % nicArr.Length;
+                    if (netRecvPerSec == 0 && netSendPerSec == 0)
+                    {
+                        ZreoTimes++;
+                    }
+                    else
+                    {
+                        ZreoTimes = 0;
+                    }
+                    if (ZreoTimes >= 3)
+                    {
+                        ComboBox.SelectedIndex = (ComboBox.SelectedIndex + 1) % nicArr.Length;
+                    }
                 }
             }
         }
@@ -389,16 +395,14 @@ namespace NetMonitor
         {
             try
             {
+                ComboBox.Text = "";
                 ComboBox.Items.Clear();
 
                 var all = NetworkInterface.GetAllNetworkInterfaces();
 
-                // 先根据状态和类型粗筛
+                // 先根据状态粗筛
                 var candidates = all.Where(nic =>
-                    nic.OperationalStatus == OperationalStatus.Up &&
-                    nic.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
-                    nic.NetworkInterfaceType != NetworkInterfaceType.Tunnel &&
-                    nic.NetworkInterfaceType != NetworkInterfaceType.Unknown
+                    nic.OperationalStatus == OperationalStatus.Up
                 );
 
                 // 进一步过滤掉虚拟网卡
@@ -431,7 +435,6 @@ namespace NetMonitor
                 ComboBox.Text = "获取网卡失败";
             }
         }
-
         private void NetMonitor_Load(object sender, EventArgs e)
         {
             //var accent = Color.FromArgb(0, 120, 215);
@@ -480,7 +483,7 @@ namespace NetMonitor
             else
             {
                 this.SetAutoRun(this.AutoRun_ToolStripMenuItem.Checked);
-                this.AutoRun_ToolStripMenuItem.Text = this.AutoRun_ToolStripMenuItem.Checked ? "开机自启(已启用)" : "开机自启(已禁用)";
+                //this.AutoRun_ToolStripMenuItem.Text = this.AutoRun_ToolStripMenuItem.Checked ? "开机自启(已启用)" : "开机自启(已禁用)";
 
             }
         }
@@ -555,12 +558,12 @@ namespace NetMonitor
             if (this.GetAutoRun() && this.CheckProgramNameAndPathNotChanged())
             {
                 this.AutoRun_ToolStripMenuItem.Checked = true;
-                this.AutoRun_ToolStripMenuItem.Text = "开机自启(已启用)";
+                //this.AutoRun_ToolStripMenuItem.Text = "开机自启(已启用)";
             }
             else
             {
                 this.AutoRun_ToolStripMenuItem.Checked = false;
-                this.AutoRun_ToolStripMenuItem.Text = "开机自启(已禁用)";
+                //this.AutoRun_ToolStripMenuItem.Text = "开机自启(已禁用)";
                 this.SetAutoRun(false);
             }
         }
