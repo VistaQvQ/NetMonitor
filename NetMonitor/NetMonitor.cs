@@ -12,9 +12,9 @@ namespace NetMonitor
 {
     public partial class NetMonitor : Form
     {
-        int InterfaceSelect = 0;
-        int ZreoTimes = 0;
-        bool Start = false;
+        private int InterfaceSelect = 0;
+        private int ZreoTimes = 0;
+        private bool Start = false;
         private NetworkInterface[] nicArr;      //网卡集合
         private System.Timers.Timer timers;
 
@@ -306,15 +306,16 @@ namespace NetMonitor
                     if (netRecvPerSec == 0 && netSendPerSec == 0)
                     {
                         ZreoTimes++;
+                        if (ZreoTimes >= 3)
+                        {
+                            ComboBox.SelectedIndex = (ComboBox.SelectedIndex + 1) % nicArr.Length;
+                        }
                     }
                     else
                     {
                         ZreoTimes = 0;
                     }
-                    if (ZreoTimes >= 3)
-                    {
-                        ComboBox.SelectedIndex = (ComboBox.SelectedIndex + 1) % nicArr.Length;
-                    }
+
                 }
             }
         }

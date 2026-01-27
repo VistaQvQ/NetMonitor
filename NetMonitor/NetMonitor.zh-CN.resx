@@ -119,22 +119,22 @@
   </resheader>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="Interface_Menu.Size" type="System.Drawing.Size, System.Drawing">
-    <value>180, 20</value>
+    <value>124, 20</value>
   </data>
   <data name="toolStripSeparator.Size" type="System.Drawing.Size, System.Drawing">
-    <value>177, 6</value>
+    <value>121, 6</value>
   </data>
   <data name="AutoRun_ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>180, 22</value>
+    <value>124, 22</value>
   </data>
   <data name="AutoRun_ToolStripMenuItem.Text" xml:space="preserve">
     <value>开机自启</value>
   </data>
   <data name="Exit_Menu.Size" type="System.Drawing.Size, System.Drawing">
-    <value>180, 22</value>
+    <value>124, 22</value>
   </data>
   <data name="Menu.Size" type="System.Drawing.Size, System.Drawing">
-    <value>181, 96</value>
+    <value>125, 74</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="Lable_SpeedDown.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
@@ -1283,8 +1283,5 @@
         ////////////////////////////////////////////////////////////////////////////////
         //////////////////////////////////8=
 </value>
-  </data>
-  <data name="$this.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
-    <value>NoControl</value>
   </data>
 </root>
