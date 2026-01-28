@@ -1,12 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Timers;
 using System.Windows.Forms;
-using System.Threading;
-using System.Linq;
-using System.Diagnostics;
 
 namespace NetMonitor
 {
@@ -14,8 +13,9 @@ namespace NetMonitor
     {
         private int InterfaceSelect = 0;
         private int ZreoTimes = 0;
-        private bool Start = false;
+        private bool SpeedCalcStart = false;
         private NetworkInterface[] nicArr;      //网卡集合
+        private NetworkInterface[] availableNic; //可用网卡集合
         private System.Timers.Timer timers;
 
         //计时器
@@ -235,10 +235,11 @@ namespace NetMonitor
                 prevBytesRecv = 0;
                 Lable_SpeedUP.Text = "  0B/S";
                 Lable_SpeedDown.Text = "  0B/S";
+                InitNetworkInterface();
                 return;
             }
 
-            if (ComboBox.SelectedIndex >= 0 && ComboBox.SelectedIndex < nicArr.Length)
+            if (ComboBox.SelectedIndex >= 0 && ComboBox.SelectedIndex < nicArr.Length)//防止越界
             {
                 var nic = nicArr[ComboBox.SelectedIndex];
                 var stats = nic.GetIPv4Statistics();
@@ -247,8 +248,8 @@ namespace NetMonitor
 
                 long deltaSent = 0;
                 long deltaRecv = 0;
-
-                if (Start && InterfaceSelect == ComboBox.SelectedIndex)
+                Debug.WriteLine(SpeedCalcStart, ComboBox.SelectedIndex.ToString());
+                if (SpeedCalcStart && InterfaceSelect == ComboBox.SelectedIndex)
                 {
                     deltaSent = bytesSent - prevBytesSent;
                     deltaRecv = bytesRecv - prevBytesRecv;
@@ -256,7 +257,7 @@ namespace NetMonitor
                 else
                 {
                     // 切换网卡或首次启动：初始化，上次值设为当前值，避免突跳
-                    Start = true;
+                    SpeedCalcStart = true;
                     InterfaceSelect = ComboBox.SelectedIndex;
                     deltaSent = 0;
                     deltaRecv = 0;
@@ -297,32 +298,43 @@ namespace NetMonitor
                 // 更新 UI：使用按秒速率显示
                 Lable_SpeedUP.Text = FormatSpeed(netSendPerSec);
                 Lable_SpeedDown.Text = FormatSpeed(netRecvPerSec);
-                if (ComboBox.Text == "无可用网络接口")//这里仍然有可能出现无网卡的情况，需要修补
+
+                if (netRecvPerSec == 0 && netSendPerSec == 0)
                 {
-                    InitNetworkInterface();
+                    ZreoTimes++;
+                    if (ZreoTimes >= 3)
+                    {
+                        if (ZreoTimes < nicArr.Length * 3)
+                        {
+                            ComboBox.SelectedIndex = (ComboBox.SelectedIndex + 1) % nicArr.Length;
+                            ZreoTimes++;
+                        }
+                        else if (IsNetworkInterfaceListChanged())
+                        {
+                            ZreoTimes = 0;
+                            InitNetworkInterface();
+                        }
+                        else
+                        {
+                            ComboBox.SelectedIndex = (ComboBox.SelectedIndex + 1) % nicArr.Length;
+                            ZreoTimes = nicArr.Length * 3; //防止溢出
+                        }
+                    }
                 }
                 else
                 {
-                    if (netRecvPerSec == 0 && netSendPerSec == 0)
-                    {
-                        ZreoTimes++;
-                        if (ZreoTimes >= 3)
-                        {
-                            ComboBox.SelectedIndex = (ComboBox.SelectedIndex + 1) % nicArr.Length;
-                        }
-                    }
-                    else
-                    {
-                        ZreoTimes = 0;
-                    }
-
+                    ZreoTimes = 0;
                 }
+
             }
         }
 
+
         private string FormatSpeed(long bytes)
         {
-            if (bytes < 1000)//处于1000~1024b之间显示时这里分母改成1000
+            if (bytes < 0)
+                return "  0B/S";
+            else if (bytes < 1000)//处于1000~1024b之间显示时这里分母改成1000
             {
                 return $"{bytes,3}B/S";
             }
@@ -394,6 +406,7 @@ namespace NetMonitor
 
         public void InitNetworkInterface()
         {
+            SpeedCalcStart = false;
             try
             {
                 ComboBox.Text = "";
@@ -420,12 +433,14 @@ namespace NetMonitor
                 if (nicArr.Length > 0)
                 {
                     ComboBox.SelectedIndex = 0;
+                    //availableNic = DeepCopy(nicArr);
                 }
                 else
                 {
                     // 如果没有找到任何物理/非虚拟网卡，保证界面不会因 SelectedIndex 异常崩溃
                     ComboBox.Text = "无可用网络接口";
                 }
+                Debug.WriteLine("可用网卡数量: " + nicArr.Length);
             }
             catch (Exception ex)
             {
@@ -578,6 +593,39 @@ namespace NetMonitor
             }
             return true;
         }
+        private bool compareNetworkLists(NetworkInterface[] list1, NetworkInterface[] list2)
+        {
+            if (list1.Length != list2.Length)
+            {
+                return false;
+            }
+            for (int i = 0; i < list1.Length; i++)
+            {
+                if (list1[i].Id != list2[i].Id)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        private bool IsNetworkInterfaceListChanged()
+        {
+            try
+            {
+                var currentNics = NetworkInterface.GetAllNetworkInterfaces();
+                var filteredCurrentNics = currentNics.Where(nic =>
+                    nic.OperationalStatus == OperationalStatus.Up &&
+                    !IsVirtualNetworkInterface(nic)).ToArray();
+                if (!compareNetworkLists(filteredCurrentNics, nicArr))
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                // 忽略异常，假设没有变化
+            }
+            return false;
+        }
     }
-
 }
