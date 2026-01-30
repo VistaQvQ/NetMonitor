@@ -333,24 +333,24 @@ namespace NetMonitor
         {
             if (bytes <= 0)
                 return "  0B/S";
-            else if (bytes < 1000)//处于1000~1024b之间显示时这里分母改成1000
+            else if (bytes < 1000)
             {
                 return $"{bytes,3}B/S";
-            }else if(bytes<1024)
+            }else if(bytes <1024)
             {
-                return $"{(bytes / 1024):F1}K/S";
+                return $"{(bytes / 1024.0):F1}K/S";
             }
-            else if (bytes < 1024 * 1000)
+            else if (bytes<1024*1000)
             {
                 return $"{(bytes / 1024.0),3:F0}K/S";
             }
             else if (bytes < 1024 * 1024)
             {
-                return $"{(bytes / (1024.0 * 1024)):F1}M/S";
+                return $"{(bytes / (1024.0 * 1024.0)):F1}M/S";
             }
             else
             {
-                return $"{(bytes / (1024.0 * 1024)),3:F0}M/S";
+                return $"{(bytes / (1024.0 * 1024.0)),3:F0}M/S";
             }
         }
 
