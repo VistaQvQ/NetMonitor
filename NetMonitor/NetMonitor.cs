@@ -219,15 +219,6 @@ namespace NetMonitor
                 return;
             }
 
-            var now = DateTime.UtcNow;
-            double deltaSeconds = 1.0; // 默认 1s，适用于首次采样或回退情况
-
-            if (prevSampleTime != DateTime.MinValue)
-            {
-                deltaSeconds = (now - prevSampleTime).TotalSeconds;
-                if (deltaSeconds <= 0) deltaSeconds = 1.0;
-            }
-            prevSampleTime = now;
 
             if (nicArr == null || nicArr.Length == 0)
             {
@@ -248,7 +239,15 @@ namespace NetMonitor
 
                 long deltaSent = 0;
                 long deltaRecv = 0;
-                Debug.WriteLine(SpeedCalcStart, ComboBox.SelectedIndex.ToString());
+                var now = DateTime.UtcNow;
+                double deltaSeconds = 1.0; // 默认 1s，适用于首次采样或回退情况
+
+                if (prevSampleTime != DateTime.MinValue)
+                {
+                    deltaSeconds = (now - prevSampleTime).TotalSeconds;
+                    if (deltaSeconds <= 0) deltaSeconds = 1.0;
+                }
+                prevSampleTime = now;
                 if (SpeedCalcStart && InterfaceSelect == ComboBox.SelectedIndex)
                 {
                     deltaSent = bytesSent - prevBytesSent;
@@ -332,19 +331,26 @@ namespace NetMonitor
 
         private string FormatSpeed(long bytes)
         {
-            if (bytes < 0)
+            if (bytes <= 0)
                 return "  0B/S";
             else if (bytes < 1000)//处于1000~1024b之间显示时这里分母改成1000
             {
                 return $"{bytes,3}B/S";
+            }else if(bytes<1024)
+            {
+                return $"{(bytes / 1024):F1}K/S";
             }
             else if (bytes < 1024 * 1000)
             {
                 return $"{(bytes / 1024.0),3:F0}K/S";
             }
+            else if (bytes < 1024 * 1024)
+            {
+                return $"{(bytes / (1024.0 * 1024)):F1}M/S";
+            }
             else
             {
-                return $"{(bytes / (1024.0 * 1000)),3:F0}M/S";
+                return $"{(bytes / (1024.0 * 1024)),3:F0}M/S";
             }
         }
 
