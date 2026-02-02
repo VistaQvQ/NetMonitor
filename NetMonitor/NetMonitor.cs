@@ -338,7 +338,7 @@ namespace NetMonitor
                 return $"{bytes,3}B/S";
             }else if(bytes <1024)
             {
-                return $"{(bytes / 1024.0):F1}K/S";
+                return "0.9K/S";
             }
             else if (bytes<1024*1000)
             {
@@ -346,7 +346,7 @@ namespace NetMonitor
             }
             else if (bytes < 1024 * 1024)
             {
-                return $"{(bytes / (1024.0 * 1024.0)):F1}M/S";
+                return "0.9M/S";
             }
             else
             {
