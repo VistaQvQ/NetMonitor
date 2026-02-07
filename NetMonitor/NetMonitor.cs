@@ -32,11 +32,15 @@ namespace NetMonitor
         // 记录上次采样时间，用于按真实时间计算速度（秒）
         private DateTime prevSampleTime = DateTime.MinValue;
 
+        // 新增字段：去抖计数
+        private int fullScreenConsecutiveCount = 0;
+        private const int FullScreenConfirmThreshold = 2; // 需要连续两次检测为全屏才认为是真正全屏（约2秒）
+
         public NetMonitor()
         {
             InitializeComponent();
             InitNetworkInterface();
-            InitializeTimer();
+            //InitializeTimer();
 #if !DEBUG
             InitAutoRunMenuItem();
 #endif
@@ -218,7 +222,14 @@ namespace NetMonitor
                 this.BeginInvoke(new Action(UpdateNetworkInterface));
                 return;
             }
-
+            if(isFullScreen())
+            {
+               this.Visible = false;
+            }
+            else
+            {
+                this.Visible = true;
+            }
 
             if (nicArr == null || nicArr.Length == 0)
             {
@@ -459,16 +470,13 @@ namespace NetMonitor
         }
         private void NetMonitor_Load(object sender, EventArgs e)
         {
-            //var accent = Color.FromArgb(0, 120, 215);
-            //if (this.panel != null) this.panel.BackColor = accent;
-            //if (this.Lable_SpeedUP != null) this.Lable_SpeedUP.BackColor = accent;
-            //if (this.Lable_SpeedDown != null) this.Lable_SpeedDown.BackColor = accent;
-            //cat 版本的代码此处如果恢复注意修改颜色和panel的背景图片
-
             this.Invoke((EventHandler)delegate
             {
                 SetGifBackground();
             });
+
+            // 把定时器启动放在窗体加载后，避免启动阶段对前台窗口判断误判
+            InitializeTimer();
         }
 
         private void NetMonitor_MouseDown(object sender, MouseEventArgs e)
@@ -632,6 +640,233 @@ namespace NetMonitor
                 // 忽略异常，假设没有变化
             }
             return false;
+        }
+        
+
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        private struct RECT
+        {
+            public int Left;
+            public int Top;
+            public int Right;
+            public int Bottom;
+        }
+
+        private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool IsWindowVisible(IntPtr hWnd);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+        // 新增：用于获取任务栏句柄与 APPBAR 状态
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct APPBARDATA
+        {
+            public int cbSize;
+            public IntPtr hWnd;
+            public uint uCallbackMessage;
+            public uint uEdge;
+            public RECT rc;
+            public int lParam;
+        }
+
+        [DllImport("shell32.dll", CharSet = CharSet.Auto)]
+        private static extern IntPtr SHAppBarMessage(int dwMessage, ref APPBARDATA pData);
+
+        private const int ABM_GETSTATE = 0x00000004;
+        private const int ABS_AUTOHIDE = 0x1;
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+
+        // 新增 P/Invoke：检测 UWP / Modern 窗口是否被 cloaked（隐藏在桌面外）
+        // DwmGetWindowAttribute 用于判断窗口是否被系统 cloaked（例如 UWP 启动期间、虚拟桌面等场景）
+        [DllImport("dwmapi.dll")]
+        private static extern int DwmGetWindowAttribute(IntPtr hwnd, int dwAttribute, out int pvAttribute, int cbAttribute);
+        private const int DWMWA_CLOAKED = 14;
+
+        // 新增常量与 P/Invoke（放在类中合适位置）
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetWindow(IntPtr hWnd, uint uCmd);
+        private const uint GW_OWNER = 4;
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+        private const int GWL_EXSTYLE = -20;
+        private const int WS_EX_TOOLWINDOW = 0x00000080;
+        private const int WS_EX_LAYERED = 0x00080000;
+
+        // 可配置：忽略刚启动的进程阈值（秒）
+        private const double IgnoreNewProcessSeconds = 3.0;
+
+        // 替换现有 isFullScreen 实现为下列更鲁棒版本
+        private bool isFullScreen()
+        {
+            const int tolerance = 8;
+            try
+            {
+                IntPtr fg = GetForegroundWindow();
+                if (fg == IntPtr.Zero) return false;
+
+                // 如果是自己且可见则不是“其他全屏”
+                if (fg == this.Handle && this.Visible && this.WindowState != FormWindowState.Minimized)
+                    return false;
+
+                // 排除被 DWM cloaked 的窗口（UWP / 尚未显示）
+                try
+                {
+                    int cloaked = 0;
+                    if (DwmGetWindowAttribute(fg, DWMWA_CLOAKED, out cloaked, sizeof(int)) == 0 && cloaked != 0)
+                        return false;
+                }
+                catch { /* 忽略 */ }
+
+                // 必须可见
+                if (!IsWindowVisible(fg)) return false;
+
+                // 排除有 owner 的窗口（通常是 splash、临时子窗口）
+                try
+                {
+                    if (GetWindow(fg, GW_OWNER) != IntPtr.Zero)
+                        return false;
+                }
+                catch { }
+
+                // 排除 toolwindow / layered 等非典型应用窗口
+                try
+                {
+                    int ex = GetWindowLong(fg, GWL_EXSTYLE);
+                    if ((ex & WS_EX_TOOLWINDOW) != 0)
+                        return false;
+                    if ((ex & WS_EX_LAYERED) != 0)
+                    {
+                        // layer 窗口通常用于透明或动画 HUD，忽略为全屏（可按需修改）
+                        return false;
+                    }
+                }
+                catch { }
+                /*大型程序在双击启动到真正显示主窗口之间，会创建临时或拥有者窗口（splash、launcher、无标题窗口、layered window）
+                 * 或者进程刚启动尚未初始化主窗口。isFullScreen 在这些短暂过渡期仍然看到一个“前台窗口且占满屏幕”的句柄，因而误判为全屏。
+                 * 解决思路：在判定为“其他全屏应用”前再做几步防护 —— 排除有 owner 的窗口（splash / 子窗口）
+                 * 排除 toolwindow/ layered 等特殊窗体、排除刚启动的进程以及未准备好主窗口的进程；并保持去抖（连续多次）确认为全屏。
+                */
+                // 获取窗口矩形
+                RECT rect;
+                if (!GetWindowRect(fg, out rect)) return false;
+                int width = rect.Right - rect.Left;
+                int height = rect.Bottom - rect.Top;
+                if (width <= 0 || height <= 0) return false;
+
+                // 如果前台窗口属于刚启动的进程，先忽略，等待进程稳定
+                try
+                {
+                    uint pid;
+                    GetWindowThreadProcessId(fg, out pid);
+                    if (pid != 0)
+                    {
+                        try
+                        {
+                            var p = Process.GetProcessById((int)pid);
+                            var startedUtc = p.StartTime.ToUniversalTime();
+                            if ((DateTime.UtcNow - startedUtc).TotalSeconds < IgnoreNewProcessSeconds)
+                            {
+                                // 进程刚启动，忽略当前“全屏”判断
+                                return false;
+                            }
+
+                            // 如果进程尚无主窗口标题或 MainWindowHandle 未就绪，说明还在初始化，忽略
+                            if (p.MainWindowHandle == IntPtr.Zero && string.IsNullOrEmpty(p.MainWindowTitle))
+                            {
+                                return false;
+                            }
+                        }
+                        catch
+                        {
+                            // 无法获取进程信息则继续后续判断
+                        }
+                    }
+                }
+                catch { }
+
+                var winRect = new Rectangle(rect.Left, rect.Top, Math.Max(1, width), Math.Max(1, height));
+                Screen screen;
+                try
+                {
+                    screen = Screen.FromRectangle(winRect);
+                }
+                catch
+                {
+                    screen = Screen.PrimaryScreen;
+                }
+                var sb = screen.Bounds;
+
+                bool coversScreen =
+                    Math.Abs(rect.Left - sb.Left) <= tolerance &&
+                    Math.Abs(rect.Top - sb.Top) <= tolerance &&
+                    Math.Abs(rect.Right - sb.Right) <= tolerance &&
+                    Math.Abs(rect.Bottom - sb.Bottom) <= tolerance;
+
+                // 任务栏检测（保留原逻辑）
+                IntPtr taskbarHwnd = FindWindow("Shell_TrayWnd", null);
+                APPBARDATA abd = new APPBARDATA();
+                abd.cbSize = Marshal.SizeOf(typeof(APPBARDATA));
+                int abmState = 0;
+                try { abmState = SHAppBarMessage(ABM_GETSTATE, ref abd).ToInt32(); } catch { }
+                bool taskbarAutoHide = (abmState & ABS_AUTOHIDE) == ABS_AUTOHIDE;
+
+                RECT taskRect = new RECT();
+                bool hasTaskRect = false;
+                if (taskbarHwnd != IntPtr.Zero)
+                {
+                    if (GetWindowRect(taskbarHwnd, out taskRect))
+                        hasTaskRect = true;
+                }
+
+                bool coversTaskbar = false;
+                if (hasTaskRect)
+                {
+                    if (rect.Left <= taskRect.Left + tolerance &&
+                        rect.Top <= taskRect.Top + tolerance &&
+                        rect.Right >= taskRect.Right - tolerance &&
+                        rect.Bottom >= taskRect.Bottom - tolerance)
+                    {
+                        coversTaskbar = true;
+                    }
+                }
+
+                if (coversScreen && (coversTaskbar || taskbarAutoHide))
+                {
+                    Debug.WriteLine("前台窗口被判定为全屏（覆盖任务栏或任务栏自动隐藏）");
+                    return true;
+                }
+
+                double areaRatio = (double)(width * height) / (sb.Width * sb.Height);
+                // 仅在面积非常接近屏幕时才以面积判定为全屏
+                if (areaRatio >= 0.995)
+                {
+                    Debug.WriteLine("前台窗口面积占比接近屏幕，判定为全屏");
+                    return true;
+                }
+
+                Debug.WriteLine("前台窗口未判定为全屏");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("isFullScreen 检测异常: " + ex.Message);
+                return false;
+            }
         }
     }
 }

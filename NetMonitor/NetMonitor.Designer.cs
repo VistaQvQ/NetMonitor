@@ -42,6 +42,7 @@
             this.labeldwon = new System.Windows.Forms.Label();
             this.labelup = new System.Windows.Forms.Label();
             this.pictureBox = new System.Windows.Forms.PictureBox();
+            this.ShowInFullScreenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu.SuspendLayout();
             this.panel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
@@ -52,6 +53,7 @@
             this.Menu.AllowMerge = false;
             this.Menu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.Interface_Menu,
+            this.ShowInFullScreenToolStripMenuItem,
             this.toolStripSeparator,
             this.AutoRun_ToolStripMenuItem,
             this.Exit_Menu});
@@ -156,6 +158,11 @@
             this.pictureBox.TabStop = false;
             this.pictureBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.NetMonitor_MouseDown);
             // 
+            // ShowInFullScreenToolStripMenuItem
+            // 
+            this.ShowInFullScreenToolStripMenuItem.Name = "ShowInFullScreenToolStripMenuItem";
+            resources.ApplyResources(this.ShowInFullScreenToolStripMenuItem, "ShowInFullScreenToolStripMenuItem");
+            // 
             // NetMonitor
             // 
             resources.ApplyResources(this, "$this");
@@ -191,6 +198,7 @@
         private System.Windows.Forms.ToolStripMenuItem AutoRun_ToolStripMenuItem;
         private System.Windows.Forms.Label labeldwon;
         private System.Windows.Forms.Label labelup;
+        private System.Windows.Forms.ToolStripMenuItem ShowInFullScreenToolStripMenuItem;
     }
 }
 

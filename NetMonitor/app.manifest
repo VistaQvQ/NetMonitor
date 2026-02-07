@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <assemblyIdentity version="1.0.0.0" name="NetMonitor.app"/>
+
+  <!-- 请求以当前用户权限运行 -->
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
+    <security>
+      <requestedPrivileges>
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+      </requestedPrivileges>
+    </security>
+  </trustInfo>
+
+  <!-- 向后兼容：老接口，Windows 7/8/8.1/10 皆可识别 -->
+  <!-- legacy dpiAware 保证在老系统上进程被视为 DPI Aware（系统不再替你缩放） -->
+  <application xmlns="urn:schemas-microsoft-com:asm.v3">
+    <windowsSettings>
+      <!-- 旧写法：兼容较老 Windows（包括 Windows 7/8） -->
+      <dpiAware>true</dpiAware>
+    </windowsSettings>
+  </application>
+
+  <!-- 新写法：Windows 8.1+ / Windows 10/11 推荐使用 -->
+  <asmv3:application xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
+    <asmv3:windowsSettings>
+      <!-- PerMonitorV2 为 Windows 10/11 上的最佳实践（禁用系统缩放并支持每显示器缩放） -->
+      <!-- 可选值: Unaware, System, PerMonitor, PerMonitorV2 -->
+      <dpiAwareness>PerMonitorV2</dpiAwareness>
+    </asmv3:windowsSettings>
+  </asmv3:application>
+
+  <!-- 可选：声明兼容性（提高在新系统上的行为一致性） -->
+  <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+    <application>
+      <!-- 留空或添加 supportedOS 节点（非必需），如需支持具体 Windows 版本可添加对应 GUID -->
+    </application>
+  </compatibility>
+</assembly>
