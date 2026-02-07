@@ -149,6 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="NetMonitor.ico" />
+    <None Include="app.manifest" />
     <None Include="packages.config" />
     <None Include="Resources\img_background.png" />
   </ItemGroup>
