@@ -36,14 +36,33 @@ namespace NetMonitor
         private int fullScreenConsecutiveCount = 0;
         private const int FullScreenConfirmThreshold = 2; // 需要连续两次检测为全屏才认为是真正全屏（约2秒）
 
+        // 在类字段区添加
+        private bool formInitialized = false;
+
         public NetMonitor()
         {
             InitializeComponent();
-            InitNetworkInterface();
-            //InitializeTimer();
+            // 不在构造函数中初始化网卡，改到 OnShown 中以避免阻塞启动
+        }
+
+        // 将初始化放到 OnShown 的简要说明：
+        // 1) 确保窗体已可见且句柄就绪，避免在启动早期对 UI 或句柄的误操作。
+        // 2) 避免在 Load/构造阶段立即触发耗时/弹窗（例如注册表访问或 MessageBox），提升首屏渲染体验。 
+        // 3) OnShown 在 UI 线程执行，便于安全地做 UI 相关初始化；配合 `initialized` 标志确保幂等。
+        // 4) 若需更早收集数据，应改为异步或延迟首次采样，避免阻塞 UI。
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            // 只在首次显示时初始化，避免重复执行
+            if (!formInitialized)
+            {
+                InitNetworkInterface();
+                InitializeTimer();
 #if !DEBUG
-            InitAutoRunMenuItem();
+                InitAutoRunMenuItem();
 #endif
+                formInitialized = true;
+            }
         }
 
         /// <summary>
@@ -222,9 +241,9 @@ namespace NetMonitor
                 this.BeginInvoke(new Action(UpdateNetworkInterface));
                 return;
             }
-            if(isFullScreen())
+            if (isFullScreen())
             {
-               this.Visible = false;
+                this.Visible = false;
             }
             else
             {
@@ -347,11 +366,12 @@ namespace NetMonitor
             else if (bytes < 1000)
             {
                 return $"{bytes,3}B/S";
-            }else if(bytes <1024)
+            }
+            else if (bytes < 1024)
             {
                 return "0.9K/S";
             }
-            else if (bytes<1024*1000)
+            else if (bytes < 1024 * 1000)
             {
                 return $"{(bytes / 1024.0),3:F0}K/S";
             }
@@ -468,6 +488,7 @@ namespace NetMonitor
                 ComboBox.Text = "获取网卡失败";
             }
         }
+        // 修改后的 NetMonitor_Load（移除 InitializeTimer/InitAutoRunMenuItem）
         private void NetMonitor_Load(object sender, EventArgs e)
         {
             this.Invoke((EventHandler)delegate
@@ -475,8 +496,10 @@ namespace NetMonitor
                 SetGifBackground();
             });
 
-            // 把定时器启动放在窗体加载后，避免启动阶段对前台窗口判断误判
-            InitializeTimer();
+            // 定时器和开机自启初始化已移至 OnShown，避免启动阶段干扰界面显示
+#if !DEBUG
+            // 保持与 DEBUG 条件一致：不在 Load 中调用
+#endif
         }
 
         private void NetMonitor_MouseDown(object sender, MouseEventArgs e)
@@ -641,7 +664,7 @@ namespace NetMonitor
             }
             return false;
         }
-        
+
 
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
         private struct RECT
@@ -867,6 +890,19 @@ namespace NetMonitor
                 Debug.WriteLine("isFullScreen 检测异常: " + ex.Message);
                 return false;
             }
+        }
+        private void readUserSettings()
+        {
+
+        }
+        private void writeUserSettings()
+        {
+
+        }
+        private void NetMonitor_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // 在窗体关闭时保存用户设置
+            writeUserSettings();
         }
     }
 }

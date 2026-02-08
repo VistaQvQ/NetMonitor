@@ -33,6 +33,7 @@
             this.Menu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.Interface_Menu = new System.Windows.Forms.ToolStripMenuItem();
             this.ComboBox = new System.Windows.Forms.ToolStripComboBox();
+            this.ShowInFullScreenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.AutoRun_ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Exit_Menu = new System.Windows.Forms.ToolStripMenuItem();
@@ -42,7 +43,6 @@
             this.labeldwon = new System.Windows.Forms.Label();
             this.labelup = new System.Windows.Forms.Label();
             this.pictureBox = new System.Windows.Forms.PictureBox();
-            this.ShowInFullScreenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu.SuspendLayout();
             this.panel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
@@ -78,6 +78,11 @@
             resources.ApplyResources(this.ComboBox, "ComboBox");
             this.ComboBox.Name = "ComboBox";
             this.ComboBox.DropDownClosed += new System.EventHandler(this.ComboBox_DropDownClosed);
+            // 
+            // ShowInFullScreenToolStripMenuItem
+            // 
+            this.ShowInFullScreenToolStripMenuItem.Name = "ShowInFullScreenToolStripMenuItem";
+            resources.ApplyResources(this.ShowInFullScreenToolStripMenuItem, "ShowInFullScreenToolStripMenuItem");
             // 
             // toolStripSeparator
             // 
@@ -157,11 +162,6 @@
             this.pictureBox.Name = "pictureBox";
             this.pictureBox.TabStop = false;
             this.pictureBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.NetMonitor_MouseDown);
-            // 
-            // ShowInFullScreenToolStripMenuItem
-            // 
-            this.ShowInFullScreenToolStripMenuItem.Name = "ShowInFullScreenToolStripMenuItem";
-            resources.ApplyResources(this.ShowInFullScreenToolStripMenuItem, "ShowInFullScreenToolStripMenuItem");
             // 
             // NetMonitor
             // 
