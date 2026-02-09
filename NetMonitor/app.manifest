@@ -2,7 +2,7 @@
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
   <assemblyIdentity version="1.0.0.0" name="NetMonitor.app"/>
 
-  <!-- ÇëÇóÒÔµ±Ç°ÓÃ»§È¨ÏÞÔËÐÐ -->
+  <!-- ï¿½ï¿½ï¿½ï¿½ï¿½Ôµï¿½Ç°ï¿½Ã»ï¿½È¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ -->
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
     <security>
       <requestedPrivileges>
@@ -11,28 +11,28 @@
     </security>
   </trustInfo>
 
-  <!-- Ïòºó¼æÈÝ£ºÀÏ½Ó¿Ú£¬Windows 7/8/8.1/10 ½Ô¿ÉÊ¶±ð -->
-  <!-- legacy dpiAware ±£Ö¤ÔÚÀÏÏµÍ³ÉÏ½ø³Ì±»ÊÓÎª DPI Aware£¨ÏµÍ³²»ÔÙÌæÄãËõ·Å£© -->
+  <!-- ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½ï¿½Ï½Ó¿Ú£ï¿½Windows 7/8/8.1/10 ï¿½Ô¿ï¿½Ê¶ï¿½ï¿½ -->
+  <!-- legacy dpiAware ï¿½ï¿½Ö¤ï¿½ï¿½ï¿½ï¿½ÏµÍ³ï¿½Ï½ï¿½ï¿½Ì±ï¿½ï¿½ï¿½Îª DPI Awareï¿½ï¿½ÏµÍ³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å£ï¿½ -->
   <application xmlns="urn:schemas-microsoft-com:asm.v3">
     <windowsSettings>
-      <!-- ¾ÉÐ´·¨£º¼æÈÝ½ÏÀÏ Windows£¨°üÀ¨ Windows 7/8£© -->
+      <!-- ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý½ï¿½ï¿½ï¿½ Windowsï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ Windows 7/8ï¿½ï¿½ -->
       <dpiAware>true</dpiAware>
     </windowsSettings>
   </application>
 
-  <!-- ÐÂÐ´·¨£ºWindows 8.1+ / Windows 10/11 ÍÆ¼öÊ¹ÓÃ -->
+  <!-- ï¿½ï¿½Ð´ï¿½ï¿½ï¿½ï¿½Windows 8.1+ / Windows 10/11 ï¿½Æ¼ï¿½Ê¹ï¿½ï¿½ -->
   <asmv3:application xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
     <asmv3:windowsSettings>
-      <!-- PerMonitorV2 Îª Windows 10/11 ÉÏµÄ×î¼ÑÊµ¼ù£¨½ûÓÃÏµÍ³Ëõ·Å²¢Ö§³ÖÃ¿ÏÔÊ¾Æ÷Ëõ·Å£© -->
-      <!-- ¿ÉÑ¡Öµ: Unaware, System, PerMonitor, PerMonitorV2 -->
+      <!-- PerMonitorV2 Îª Windows 10/11 ï¿½Ïµï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÏµÍ³ï¿½ï¿½ï¿½Å²ï¿½Ö§ï¿½ï¿½Ã¿ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½Å£ï¿½ -->
+      <!-- ï¿½ï¿½Ñ¡Öµ: Unaware, System, PerMonitor, PerMonitorV2 -->
       <dpiAwareness>PerMonitorV2</dpiAwareness>
     </asmv3:windowsSettings>
   </asmv3:application>
 
-  <!-- ¿ÉÑ¡£ºÉùÃ÷¼æÈÝÐÔ£¨Ìá¸ßÔÚÐÂÏµÍ³ÉÏµÄÐÐÎªÒ»ÖÂÐÔ£© -->
+  <!-- ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÏµÍ³ï¿½Ïµï¿½ï¿½ï¿½ÎªÒ»ï¿½ï¿½ï¿½Ô£ï¿½ -->
   <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
     <application>
-      <!-- Áô¿Õ»òÌí¼Ó supportedOS ½Úµã£¨·Ç±ØÐè£©£¬ÈçÐèÖ§³Ö¾ßÌå Windows °æ±¾¿ÉÌí¼Ó¶ÔÓ¦ GUID -->
+      <!-- ï¿½ï¿½Õ»ï¿½ï¿½ï¿½ï¿½ supportedOS ï¿½Úµã£¨ï¿½Ç±ï¿½ï¿½è£©ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö§ï¿½Ö¾ï¿½ï¿½ï¿½ Windows ï¿½æ±¾ï¿½ï¿½ï¿½ï¿½Ó¶ï¿½Ó¦ GUID -->
     </application>
   </compatibility>
 </assembly>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetMonitor.Properties;
+using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
@@ -58,6 +59,7 @@ namespace NetMonitor
             {
                 InitNetworkInterface();
                 InitializeTimer();
+                readUserSettings();
 #if !DEBUG
                 InitAutoRunMenuItem();
 #endif
@@ -241,15 +243,8 @@ namespace NetMonitor
                 this.BeginInvoke(new Action(UpdateNetworkInterface));
                 return;
             }
-            if (isFullScreen())
-            {
-                this.Visible = false;
-            }
-            else
-            {
-                this.Visible = true;
-            }
-
+            this.Visible = !isFullScreen() || this.ShowInFullScreenToolStripMenuItem.Checked;
+            
             if (nicArr == null || nicArr.Length == 0)
             {
                 prevBytesSent = 0;
@@ -515,8 +510,7 @@ namespace NetMonitor
                 Menu.Hide();//隐藏一些东西
                 if (MessageBox.Show("你确定关闭流量悬浮窗么？", "提示", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                    base.Dispose();//这个是啥？我忘了
-                    Application.Exit();
+                   this.Close();
                 }
 
             }
@@ -891,13 +885,44 @@ namespace NetMonitor
                 return false;
             }
         }
+        /// <summary>
+        /// 从用户设置读取并应用到窗体。改进要点：
+        /// 1. 合并布尔赋值，去掉不必要的 if/else，使代码更简洁可读；
+        /// 2. 对位置进行空/默认值保护，避免把无效位置（如默认 Point）覆盖到窗体上；
+        /// 3. 增加异常保护，防止设置读取出错导致崩溃；
+        /// 4. 保持幂等性：多次调用不会改变已正确设置的状态。
+        /// Properties.Settings.Default 不是 C# 的 default 关键字。
+        /// Default 是自动生成的 Settings 类的静态属性（单例），表示当前运行时的设置实例。它封装了应用的设计时默认值与用户上次保存的值。
+        /// </summary>
         private void readUserSettings()
+{
+    try
+    {
+        // 读取并应用窗口位置：仅在设置非 null 且不为默认 Point(0,0) 时才应用，
+        // 避免意外把未初始化的设置覆盖到窗体位置。
+        var loc = Properties.Settings.Default.WinowLocation;
+        if (loc != null && loc != default(System.Drawing.Point))
         {
-
+            this.Location = loc;
         }
+
+        // 直接赋值 Checked 属性，更简洁且语义明确
+        this.ShowInFullScreenToolStripMenuItem.Checked = Properties.Settings.Default.ShowInFullScreen;
+    }
+    catch (Exception ex)
+    {
+        // 最小化处理，记录调试信息但不抛出，保证程序稳定性
+        this.Location = new System.Drawing.Point(710, 10); // 默认位置
+        this.ShowInFullScreenToolStripMenuItem.Checked = false; // 默认不在全屏显示
+        System.Diagnostics.Debug.WriteLine("读取用户设置失败: " + ex.Message);
+    }
+}
         private void writeUserSettings()
         {
-
+            Properties.Settings.Default.WinowLocation = this.Location;
+            Properties.Settings.Default.ShowInFullScreen = this.ShowInFullScreenToolStripMenuItem.Checked;
+            Debug.WriteLine("保存用户设置: Location=" + this.Location + ", ShowInFullScreen=" + this.ShowInFullScreenToolStripMenuItem.Checked);
+            Properties.Settings.Default.Save();
         }
         private void NetMonitor_FormClosing(object sender, FormClosingEventArgs e)
         {
