@@ -244,7 +244,7 @@ namespace NetMonitor
                 return;
             }
             this.Visible = !isFullScreen() || this.ShowInFullScreenToolStripMenuItem.Checked;
-            
+
             if (nicArr == null || nicArr.Length == 0)
             {
                 prevBytesSent = 0;
@@ -501,6 +501,7 @@ namespace NetMonitor
         {
             ReleaseCapture();
             SendMessage(this.Handle, WM_SYSCOMMAND, SC_MOVE + HTCAPTION, 0);
+            writeUserSettings();
         }
 
         private void Exit_Menu_MouseDown(object sender, MouseEventArgs e)
@@ -510,7 +511,7 @@ namespace NetMonitor
                 Menu.Hide();//隐藏一些东西
                 if (MessageBox.Show("你确定关闭流量悬浮窗么？", "提示", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
-                   this.Close();
+                    this.Close();
                 }
 
             }
@@ -895,28 +896,28 @@ namespace NetMonitor
         /// Default 是自动生成的 Settings 类的静态属性（单例），表示当前运行时的设置实例。它封装了应用的设计时默认值与用户上次保存的值。
         /// </summary>
         private void readUserSettings()
-{
-    try
-    {
-        // 读取并应用窗口位置：仅在设置非 null 且不为默认 Point(0,0) 时才应用，
-        // 避免意外把未初始化的设置覆盖到窗体位置。
-        var loc = Properties.Settings.Default.WinowLocation;
-        if (loc != null && loc != default(System.Drawing.Point))
         {
-            this.Location = loc;
-        }
+            try
+            {
+                // 读取并应用窗口位置：仅在设置非 null 且不为默认 Point(0,0) 时才应用，
+                // 避免意外把未初始化的设置覆盖到窗体位置。
+                var loc = Properties.Settings.Default.WinowLocation;
+                if (loc != null && loc != default(System.Drawing.Point))
+                {
+                    this.Location = loc;
+                }
 
-        // 直接赋值 Checked 属性，更简洁且语义明确
-        this.ShowInFullScreenToolStripMenuItem.Checked = Properties.Settings.Default.ShowInFullScreen;
-    }
-    catch (Exception ex)
-    {
-        // 最小化处理，记录调试信息但不抛出，保证程序稳定性
-        this.Location = new System.Drawing.Point(710, 10); // 默认位置
-        this.ShowInFullScreenToolStripMenuItem.Checked = false; // 默认不在全屏显示
-        System.Diagnostics.Debug.WriteLine("读取用户设置失败: " + ex.Message);
-    }
-}
+                // 直接赋值 Checked 属性，更简洁且语义明确
+                this.ShowInFullScreenToolStripMenuItem.Checked = Properties.Settings.Default.ShowInFullScreen;
+            }
+            catch (Exception ex)
+            {
+                // 最小化处理，记录调试信息但不抛出，保证程序稳定性
+                this.Location = new System.Drawing.Point(710, 10); // 默认位置
+                this.ShowInFullScreenToolStripMenuItem.Checked = false; // 默认不在全屏显示
+                System.Diagnostics.Debug.WriteLine("读取用户设置失败: " + ex.Message);
+            }
+        }
         private void writeUserSettings()
         {
             Properties.Settings.Default.WinowLocation = this.Location;
@@ -928,6 +929,54 @@ namespace NetMonitor
         {
             // 在窗体关闭时保存用户设置
             writeUserSettings();
+        }
+        private long GetAllNicBytesSent(NetworkInterface[] nics)
+        {
+            long total = 0;
+            foreach (var nic in nics)
+            {
+                try
+                {
+                    total += nic.GetIPv4Statistics().BytesSent;
+                }
+                catch { }
+            }
+            return total;
+        }
+        private long GetAllNicBytesReceived(NetworkInterface[] nics)
+        {
+            long total = 0;
+            foreach (var nic in nics)
+            {
+                try
+                {
+                    total += nic.GetIPv4Statistics().BytesReceived;
+                }
+                catch { }
+            }
+            return total;
+        }
+        private long GetSigleNicBytesSent(NetworkInterface nic)
+        {
+            try
+            {
+                return nic.GetIPv4Statistics().BytesSent;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+        private long GetSigleNicBytesReceived(NetworkInterface nic)
+        {
+            try
+            {
+                return nic.GetIPv4Statistics().BytesReceived;
+            }
+            catch
+            {
+                return 0;
+            }
         }
     }
 }
