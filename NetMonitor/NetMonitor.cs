@@ -979,7 +979,7 @@ namespace NetMonitor
         }
         private void NetMonitor_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // 在窗体关闭时保存用户设置
+            // 保存用户设置
             writeUserSettings();
 
             // 显式隐藏托盘图标，避免程序退出后图标滞留在通知区域（"幽灵图标"）
@@ -990,6 +990,16 @@ namespace NetMonitor
                 trayIcon.Visible = false;
                 Debug.WriteLine("[FormClosing] 托盘图标已隐藏");
             }
+
+            // ── 关键：终止消息循环，让进程完全退出 ──────────────────────────────
+            // Program.cs 使用空 ApplicationContext 启动消息循环（Application.Run），
+            // 目的是防止 WinForms 把主窗口注册为"应用"。
+            // 副作用：关闭窗体时消息循环不知道"主窗口"已关闭，不会自动停止，
+            //   进程会以"后台进程"的形式持续挂在任务管理器中。
+            // 解决方案：在 FormClosing 中显式调用 Application.Exit()，
+            //   通知消息循环安全退出，进程随之完全终止。
+            Debug.WriteLine("[FormClosing] 调用 Application.Exit()，终止消息循环");
+            Application.Exit();
         }
         private long GetAllNicBytesSent(NetworkInterface[] nics)
         {

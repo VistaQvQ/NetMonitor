@@ -33,6 +33,7 @@
             this.Menu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.Interface_Menu = new System.Windows.Forms.ToolStripMenuItem();
             this.ComboBox = new System.Windows.Forms.ToolStripComboBox();
+            this.MultNicMode_ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ShowInFullScreen_ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.AutoRun_ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -43,7 +44,6 @@
             this.labeldwon = new System.Windows.Forms.Label();
             this.labelup = new System.Windows.Forms.Label();
             this.pictureBox = new System.Windows.Forms.PictureBox();
-            this.MultNicMode_ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu.SuspendLayout();
             this.panel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
@@ -81,6 +81,12 @@
             resources.ApplyResources(this.ComboBox, "ComboBox");
             this.ComboBox.Name = "ComboBox";
             this.ComboBox.DropDownClosed += new System.EventHandler(this.ComboBox_DropDownClosed);
+            // 
+            // MultNicMode_ToolStripMenuItem
+            // 
+            this.MultNicMode_ToolStripMenuItem.CheckOnClick = true;
+            this.MultNicMode_ToolStripMenuItem.Name = "MultNicMode_ToolStripMenuItem";
+            resources.ApplyResources(this.MultNicMode_ToolStripMenuItem, "MultNicMode_ToolStripMenuItem");
             // 
             // ShowInFullScreen_ToolStripMenuItem
             // 
@@ -166,12 +172,6 @@
             this.pictureBox.Name = "pictureBox";
             this.pictureBox.TabStop = false;
             this.pictureBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.NetMonitor_MouseDown);
-            // 
-            // MultNicMode_ToolStripMenuItem
-            // 
-            this.MultNicMode_ToolStripMenuItem.CheckOnClick = true;
-            this.MultNicMode_ToolStripMenuItem.Name = "MultNicMode_ToolStripMenuItem";
-            resources.ApplyResources(this.MultNicMode_ToolStripMenuItem, "MultNicMode_ToolStripMenuItem");
             // 
             // NetMonitor
             // 
