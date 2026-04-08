@@ -120,24 +120,23 @@
   <metadata name="Menu.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>13, 18</value>
   </metadata>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="ComboBox.FlatStyle" type="System.Windows.Forms.FlatStyle, System.Windows.Forms">
-    <value>Standard</value>
-  </data>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="ComboBox.Size" type="System.Drawing.Size, System.Drawing">
-    <value>75, 25</value>
-  </data>
   <data name="Interface_Menu.Size" type="System.Drawing.Size, System.Drawing">
     <value>180, 20</value>
   </data>
   <data name="Interface_Menu.Text" xml:space="preserve">
     <value>网卡选择</value>
   </data>
-  <data name="ShowInFullScreenToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="MultNicMode_ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>180, 22</value>
   </data>
-  <data name="ShowInFullScreenToolStripMenuItem.Text" xml:space="preserve">
+  <data name="MultNicMode_ToolStripMenuItem.Text" xml:space="preserve">
+    <value>多网卡模式</value>
+  </data>
+  <data name="ShowInFullScreen_ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>180, 22</value>
+  </data>
+  <data name="ShowInFullScreen_ToolStripMenuItem.Text" xml:space="preserve">
     <value>全屏显示</value>
   </data>
   <data name="toolStripSeparator.Size" type="System.Drawing.Size, System.Drawing">
@@ -156,13 +155,20 @@
     <value>退出</value>
   </data>
   <data name="Menu.Size" type="System.Drawing.Size, System.Drawing">
-    <value>181, 118</value>
+    <value>181, 140</value>
   </data>
   <data name="&gt;&gt;Menu.Name" xml:space="preserve">
     <value>Menu</value>
   </data>
   <data name="&gt;&gt;Menu.Type" xml:space="preserve">
     <value>System.Windows.Forms.ContextMenuStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="ComboBox.FlatStyle" type="System.Windows.Forms.FlatStyle, System.Windows.Forms">
+    <value>Standard</value>
+  </data>
+  <data name="ComboBox.Size" type="System.Drawing.Size, System.Drawing">
+    <value>75, 25</value>
   </data>
   <metadata name="panel.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
@@ -1531,10 +1537,10 @@
   <data name="&gt;&gt;ComboBox.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;ShowInFullScreenToolStripMenuItem.Name" xml:space="preserve">
-    <value>ShowInFullScreenToolStripMenuItem</value>
+  <data name="&gt;&gt;ShowInFullScreen_ToolStripMenuItem.Name" xml:space="preserve">
+    <value>ShowInFullScreen_ToolStripMenuItem</value>
   </data>
-  <data name="&gt;&gt;ShowInFullScreenToolStripMenuItem.Type" xml:space="preserve">
+  <data name="&gt;&gt;ShowInFullScreen_ToolStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator.Name" xml:space="preserve">
@@ -1553,6 +1559,12 @@
     <value>Exit_Menu</value>
   </data>
   <data name="&gt;&gt;Exit_Menu.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;MultNicMode_ToolStripMenuItem.Name" xml:space="preserve">
+    <value>MultNicMode_ToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;MultNicMode_ToolStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
