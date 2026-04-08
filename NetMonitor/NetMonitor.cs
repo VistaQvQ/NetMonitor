@@ -37,8 +37,16 @@ namespace NetMonitor
         private int fullScreenConsecutiveCount = 0;
         private const int FullScreenConfirmThreshold = 2; // 需要连续两次检测为全屏才认为是真正全屏（约2秒）
 
-        // 在类字段区添加
+        // 初始化完成标志（幂等保护）
         private bool formInitialized = false;
+
+        /// <summary>
+        /// 系统托盘图标。
+        /// 在 OnShown 中创建，与窗体右键菜单（Menu）共用同一个 ContextMenuStrip 实例，
+        /// 保证菜单项状态自动同步，无需额外逻辑。
+        /// 在 FormClosing 中设置 Visible = false 以避免"幽灵图标"（程序退出后图标滞留）。
+        /// </summary>
+        private NotifyIcon trayIcon;
 
         public NetMonitor()
         {
@@ -54,6 +62,7 @@ namespace NetMonitor
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
+            Debug.WriteLine($"[OnShown] 触发，formInitialized={formInitialized}, this.Visible={this.Visible}, Handle={this.Handle}");
             // 只在首次显示时初始化，避免重复执行
             if (!formInitialized)
             {
@@ -64,6 +73,29 @@ namespace NetMonitor
                 InitAutoRunMenuItem();
 #endif
                 formInitialized = true;
+                Debug.WriteLine("[OnShown] 核心初始化完成");
+
+                // ── 初始化系统托盘图标 ────────────────────────────────────────────
+                // 使用 this.components 托管生命周期，窗体 Dispose 时自动清理。
+                // Icon：提取可执行文件关联图标，与资源管理器/任务管理器显示一致。
+                // ContextMenuStrip：直接复用窗体已有的 Menu 实例，
+                //   菜单项（选项勾选状态、网卡列表等）自动同步，无需额外代码。
+                trayIcon = new NotifyIcon(this.components)
+                {
+                    Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath),
+                    Text = "NetMonitor - 网络速度监控",
+                    Visible = true,
+                    ContextMenuStrip = this.Menu   // 与窗体右键菜单共用同一实例
+                };
+
+                // 双击托盘图标：切换悬浮窗显示/隐藏（方便在全屏应用下临时唤出）
+                trayIcon.DoubleClick += (s, ev) =>
+                {
+                    this.Visible = !this.Visible;
+                    Debug.WriteLine($"[TrayIcon] 双击，窗体可见性切换为 {this.Visible}");
+                };
+
+                Debug.WriteLine("[OnShown] 托盘图标初始化完成");
             }
         }
 
@@ -90,7 +122,7 @@ namespace NetMonitor
         public static extern bool SendMessage(IntPtr hwnd, int wMsg, int wParam, int lParam);
 
         /// <summary>
-        /// 在 Windows 消息中表示“系统命令”消息（消息编号 0x0112）。
+        /// 在 Windows 消息中表示"系统命令"消息（消息编号 0x0112）。
         /// 与 SendMessage 配合使用以发送系统级命令（如最小化、最大化或移动）。
         /// </summary>
         public const int WM_SYSCOMMAND = 0x0112;
@@ -243,7 +275,10 @@ namespace NetMonitor
                 this.BeginInvoke(new Action(UpdateNetworkInterface));
                 return;
             }
-            this.Visible = !isFullScreen() || this.ShowInFullScreenToolStripMenuItem.Checked;
+            bool fullScreen = isFullScreen();
+            bool shouldShow = !fullScreen || this.ShowInFullScreen_ToolStripMenuItem.Checked;
+            Debug.WriteLine($"[UpdateNetworkInterface] isFullScreen={fullScreen}, ShowInFullScreen={this.ShowInFullScreen_ToolStripMenuItem.Checked}, shouldShow={shouldShow}, currentVisible={this.Visible}");
+            this.Visible = shouldShow;
 
             if (nicArr == null || nicArr.Length == 0)
             {
@@ -287,7 +322,7 @@ namespace NetMonitor
                     deltaRecv = 0;
                 }
 
-                // 更新“前一次”值（用于下一次差值计算）
+                // 更新"前一次"值（用于下一次差值计算）
                 prevBytesSent = bytesSent;
                 prevBytesRecv = bytesRecv;
 
@@ -486,15 +521,12 @@ namespace NetMonitor
         // 修改后的 NetMonitor_Load（移除 InitializeTimer/InitAutoRunMenuItem）
         private void NetMonitor_Load(object sender, EventArgs e)
         {
-            this.Invoke((EventHandler)delegate
-            {
-                SetGifBackground();
-            });
+            // Load 触发时消息循环尚未启动，不能用 Invoke（会死锁），直接调用即可
+            // （Load 本身就在 UI 线程）
+            Debug.WriteLine("[NetMonitor_Load] 触发，设置 GIF 背景");
+            SetGifBackground();
 
             // 定时器和开机自启初始化已移至 OnShown，避免启动阶段干扰界面显示
-#if !DEBUG
-            // 保持与 DEBUG 条件一致：不在 Load 中调用
-#endif
         }
 
         private void NetMonitor_MouseDown(object sender, MouseEventArgs e)
@@ -735,11 +767,28 @@ namespace NetMonitor
             try
             {
                 IntPtr fg = GetForegroundWindow();
+                Debug.WriteLine($"[isFullScreen] GetForegroundWindow() = {fg}, this.Handle = {this.Handle}, this.Visible = {this.Visible}");
+
                 if (fg == IntPtr.Zero) return false;
 
-                // 如果是自己且可见则不是“其他全屏”
-                if (fg == this.Handle && this.Visible && this.WindowState != FormWindowState.Minimized)
-                    return false;
+                // ── 自身判断 ──────────────────────────────────────────────────────
+                // 原始逻辑：fg == this.Handle 直接比较句柄
+                // 【注意】使用 SetParent 后主窗口是子窗口，GetForegroundWindow() 永远不会
+                //   返回子窗口句柄（只返回顶级窗口），因此 fg == this.Handle 永远为 false。
+                // 修复：改用进程 ID 判断 —— 前台窗口属于本进程则不是"其他全屏"。
+                try
+                {
+                    uint fgPid;
+                    GetWindowThreadProcessId(fg, out fgPid);
+                    uint selfPid = (uint)Process.GetCurrentProcess().Id;
+                    Debug.WriteLine($"[isFullScreen] fg进程ID = {fgPid}, 本进程ID = {selfPid}");
+                    if (fgPid == selfPid)
+                    {
+                        Debug.WriteLine("[isFullScreen] 前台窗口属于本进程，返回 false");
+                        return false;
+                    }
+                }
+                catch { }
 
                 // 排除被 DWM cloaked 的窗口（UWP / 尚未显示）
                 try
@@ -775,8 +824,8 @@ namespace NetMonitor
                 }
                 catch { }
                 /*大型程序在双击启动到真正显示主窗口之间，会创建临时或拥有者窗口（splash、launcher、无标题窗口、layered window）
-                 * 或者进程刚启动尚未初始化主窗口。isFullScreen 在这些短暂过渡期仍然看到一个“前台窗口且占满屏幕”的句柄，因而误判为全屏。
-                 * 解决思路：在判定为“其他全屏应用”前再做几步防护 —— 排除有 owner 的窗口（splash / 子窗口）
+                 * 或者进程刚启动尚未初始化主窗口。isFullScreen 在这些短暂过渡期仍然看到一个"前台窗口且占满屏幕"的句柄，因而误判为全屏。
+                 * 解决思路：在判定为"其他全屏应用"前再做几步防护 —— 排除有 owner 的窗口（splash / 子窗口）
                  * 排除 toolwindow/ layered 等特殊窗体、排除刚启动的进程以及未准备好主窗口的进程；并保持去抖（连续多次）确认为全屏。
                 */
                 // 获取窗口矩形
@@ -799,7 +848,7 @@ namespace NetMonitor
                             var startedUtc = p.StartTime.ToUniversalTime();
                             if ((DateTime.UtcNow - startedUtc).TotalSeconds < IgnoreNewProcessSeconds)
                             {
-                                // 进程刚启动，忽略当前“全屏”判断
+                                // 进程刚启动，忽略当前"全屏"判断
                                 return false;
                             }
 
@@ -908,27 +957,39 @@ namespace NetMonitor
                 }
 
                 // 直接赋值 Checked 属性，更简洁且语义明确
-                this.ShowInFullScreenToolStripMenuItem.Checked = Properties.Settings.Default.ShowInFullScreen;
+                this.ShowInFullScreen_ToolStripMenuItem.Checked = Properties.Settings.Default.ShowInFullScreen;
+                this.MultNicMode_ToolStripMenuItem.Checked = Properties.Settings.Default.MultNicMode;
             }
             catch (Exception ex)
             {
                 // 最小化处理，记录调试信息但不抛出，保证程序稳定性
                 this.Location = new System.Drawing.Point(710, 10); // 默认位置
-                this.ShowInFullScreenToolStripMenuItem.Checked = false; // 默认不在全屏显示
+                this.ShowInFullScreen_ToolStripMenuItem.Checked = false; // 默认不在全屏显示
+                this.MultNicMode_ToolStripMenuItem.Checked = false; // 默认单网卡模式
                 System.Diagnostics.Debug.WriteLine("读取用户设置失败: " + ex.Message);
             }
         }
         private void writeUserSettings()
         {
             Properties.Settings.Default.WinowLocation = this.Location;
-            Properties.Settings.Default.ShowInFullScreen = this.ShowInFullScreenToolStripMenuItem.Checked;
-            Debug.WriteLine("保存用户设置: Location=" + this.Location + ", ShowInFullScreen=" + this.ShowInFullScreenToolStripMenuItem.Checked);
+            Properties.Settings.Default.ShowInFullScreen = this.ShowInFullScreen_ToolStripMenuItem.Checked;
+            Properties.Settings.Default.MultNicMode = this.MultNicMode_ToolStripMenuItem.Checked;
+            Debug.WriteLine("保存用户设置: Location=" + this.Location + ", ShowInFullScreen=" + this.ShowInFullScreen_ToolStripMenuItem.Checked);
             Properties.Settings.Default.Save();
         }
         private void NetMonitor_FormClosing(object sender, FormClosingEventArgs e)
         {
             // 在窗体关闭时保存用户设置
             writeUserSettings();
+
+            // 显式隐藏托盘图标，避免程序退出后图标滞留在通知区域（"幽灵图标"）
+            // 即使 components.Dispose() 会自动调用 trayIcon.Dispose()，
+            // 在某些 Windows 版本下不主动设置 Visible=false 仍可能出现残留图标。
+            if (trayIcon != null)
+            {
+                trayIcon.Visible = false;
+                Debug.WriteLine("[FormClosing] 托盘图标已隐藏");
+            }
         }
         private long GetAllNicBytesSent(NetworkInterface[] nics)
         {

@@ -33,7 +33,7 @@
             this.Menu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.Interface_Menu = new System.Windows.Forms.ToolStripMenuItem();
             this.ComboBox = new System.Windows.Forms.ToolStripComboBox();
-            this.ShowInFullScreenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ShowInFullScreen_ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
             this.AutoRun_ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Exit_Menu = new System.Windows.Forms.ToolStripMenuItem();
@@ -43,6 +43,7 @@
             this.labeldwon = new System.Windows.Forms.Label();
             this.labelup = new System.Windows.Forms.Label();
             this.pictureBox = new System.Windows.Forms.PictureBox();
+            this.MultNicMode_ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Menu.SuspendLayout();
             this.panel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
@@ -53,7 +54,8 @@
             this.Menu.AllowMerge = false;
             this.Menu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.Interface_Menu,
-            this.ShowInFullScreenToolStripMenuItem,
+            this.MultNicMode_ToolStripMenuItem,
+            this.ShowInFullScreen_ToolStripMenuItem,
             this.toolStripSeparator,
             this.AutoRun_ToolStripMenuItem,
             this.Exit_Menu});
@@ -80,11 +82,11 @@
             this.ComboBox.Name = "ComboBox";
             this.ComboBox.DropDownClosed += new System.EventHandler(this.ComboBox_DropDownClosed);
             // 
-            // ShowInFullScreenToolStripMenuItem
+            // ShowInFullScreen_ToolStripMenuItem
             // 
-            this.ShowInFullScreenToolStripMenuItem.CheckOnClick = true;
-            this.ShowInFullScreenToolStripMenuItem.Name = "ShowInFullScreenToolStripMenuItem";
-            resources.ApplyResources(this.ShowInFullScreenToolStripMenuItem, "ShowInFullScreenToolStripMenuItem");
+            this.ShowInFullScreen_ToolStripMenuItem.CheckOnClick = true;
+            this.ShowInFullScreen_ToolStripMenuItem.Name = "ShowInFullScreen_ToolStripMenuItem";
+            resources.ApplyResources(this.ShowInFullScreen_ToolStripMenuItem, "ShowInFullScreen_ToolStripMenuItem");
             // 
             // toolStripSeparator
             // 
@@ -165,6 +167,12 @@
             this.pictureBox.TabStop = false;
             this.pictureBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.NetMonitor_MouseDown);
             // 
+            // MultNicMode_ToolStripMenuItem
+            // 
+            this.MultNicMode_ToolStripMenuItem.CheckOnClick = true;
+            this.MultNicMode_ToolStripMenuItem.Name = "MultNicMode_ToolStripMenuItem";
+            resources.ApplyResources(this.MultNicMode_ToolStripMenuItem, "MultNicMode_ToolStripMenuItem");
+            // 
             // NetMonitor
             // 
             resources.ApplyResources(this, "$this");
@@ -201,7 +209,8 @@
         private System.Windows.Forms.ToolStripMenuItem AutoRun_ToolStripMenuItem;
         private System.Windows.Forms.Label labeldwon;
         private System.Windows.Forms.Label labelup;
-        private System.Windows.Forms.ToolStripMenuItem ShowInFullScreenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ShowInFullScreen_ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem MultNicMode_ToolStripMenuItem;
     }
 }
 
