@@ -48,6 +48,19 @@ namespace NetMonitor
         /// </summary>
         private NotifyIcon trayIcon;
 
+        /// <summary>
+        /// 临时字段：控制当前处于单网卡模式(false)还是多网卡模式(true)。
+        /// 下阶段会由用户设置持久化，目前硬编码为 false（单网卡模式）。
+        /// </summary>
+        private bool temp＿isMultiMode = false;
+
+        /// <summary>
+        /// 无网时自动切换网卡的开关。
+        /// true = 启用自动切换（当前默认）；false = 禁用，网速归零后不切卡。
+        /// 下阶段会绑定到菜单项，目前默认 true。
+        /// </summary>
+        private bool autoSwitchNicEnabled = true;
+
         public NetMonitor()
         {
             InitializeComponent();
@@ -266,127 +279,254 @@ namespace NetMonitor
             }
         }
 
+        // ══════════════════════════════════════════════════════════════════════════
+        // 网速更新主入口
+        // ══════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// 定时器回调的入口。
+        /// 负责两件事：
+        ///   1. 确保在 UI 线程执行（InvokeRequired → BeginInvoke）；
+        ///   2. 调用 UpdateVisibility()，再按当前模式分发到 Single/MultiMode。
+        /// </summary>
         public void UpdateNetworkInterface()
         {
-            // 确保在 UI 线程执行
+            // 确保在 UI 线程执行；BeginInvoke 避免阻塞计时器线程
             if (this.InvokeRequired)
             {
-                // 使用 BeginInvoke 以避免阻塞调用线程（和计时器线程）
                 this.BeginInvoke(new Action(UpdateNetworkInterface));
                 return;
             }
+
+            // ── 公用：全屏判定 + 窗体可见性 ──────────────────────────────────────
+            UpdateVisibility();
+
+            // ── 按模式分发 ────────────────────────────────────────────────────────
+            if (temp＿isMultiMode)
+                UpdateMultiMode();
+            else
+                UpdateSingleMode();
+        }
+
+        // ══════════════════════════════════════════════════════════════════════════
+        // 公用：全屏判定 + 窗体可见性控制
+        // ══════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// 【公用】检测前台窗口是否全屏，决定本悬浮窗是否显示。
+        /// 脱离 UpdateNetworkInterface，以便 Single/MultiMode 共同复用，
+        /// 或在不刷新速度数据时单独调用。
+        /// </summary>
+        private void UpdateVisibility()
+        {
             bool fullScreen = isFullScreen();
             bool shouldShow = !fullScreen || this.ShowInFullScreen_ToolStripMenuItem.Checked;
-            Debug.WriteLine($"[UpdateNetworkInterface] isFullScreen={fullScreen}, ShowInFullScreen={this.ShowInFullScreen_ToolStripMenuItem.Checked}, shouldShow={shouldShow}, currentVisible={this.Visible}");
+            Debug.WriteLine(
+                $"[UpdateVisibility] isFullScreen={fullScreen}, " +
+                $"ShowInFullScreen={this.ShowInFullScreen_ToolStripMenuItem.Checked}, " +
+                $"shouldShow={shouldShow}, currentVisible={this.Visible}");
             this.Visible = shouldShow;
+        }
 
+        // ══════════════════════════════════════════════════════════════════════════
+        // 单网卡模式（SingleMode）
+        // ══════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// 【SingleMode 独有】单网卡模式的完整更新流程。
+        /// 流程：网卡空判定/刷新 → 防越界 → 差值计算/gifStep → UI 更新 → 无网自动切换。
+        /// </summary>
+        private void UpdateSingleMode()
+        {
+            // ── 功能2：网卡为空数据判定 + 网卡刷新（SingleMode 独有）───────────────
+            // nicArr 为空说明网络接口尚未加载或全部失效，重置速度并重新初始化
             if (nicArr == null || nicArr.Length == 0)
             {
-                prevBytesSent = 0;
-                prevBytesRecv = 0;
-                Lable_SpeedUP.Text = "  0B/S";
-                Lable_SpeedDown.Text = "  0B/S";
+                ResetSpeedData();
                 InitNetworkInterface();
                 return;
             }
 
-            if (ComboBox.SelectedIndex >= 0 && ComboBox.SelectedIndex < nicArr.Length)//防止越界
+            // ── 功能3：防越界判定（SingleMode 独有）──────────────────────────────
+            // ComboBox 下标越界时跳过本次更新，避免数组越界异常
+            if (ComboBox.SelectedIndex < 0 || ComboBox.SelectedIndex >= nicArr.Length)
+                return;
+
+            // 取当前选中网卡的原始字节数
+            var nic = nicArr[ComboBox.SelectedIndex];
+            long bytesSent = GetSigleNicBytesSent(nic);
+            long bytesRecv = GetSigleNicBytesReceived(nic);
+
+            // ── 功能4+5+6：数据初始化/时间计算 + 防数据突跳 + 差值/gifStep（公用逻辑）
+            CalcSpeedAndGifStep(
+                bytesSent, bytesRecv,
+                out long netSendPerSec, out long netRecvPerSec);
+
+            // ── 功能7：UI 更新（公用逻辑）────────────────────────────────────────
+            UpdateSpeedToUI(netSendPerSec, netRecvPerSec);
+
+            // ── 功能8：无网时网卡自动切换（SingleMode 独有）──────────────────────
+            AutoSwitchNicOnZeroSpeed_SingleMode(netSendPerSec, netRecvPerSec);
+        }
+
+        // ══════════════════════════════════════════════════════════════════════════
+        // 多网卡模式（MultiMode）——空桩，下阶段完善
+        // ══════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// 【MultiMode】多网卡模式的更新流程。
+        /// 当前为空桩，下阶段完善。
+        /// 预计流程：汇总所有网卡字节数 → CalcSpeedAndGifStep → ApplySpeedToUI。
+        /// </summary>
+        private void UpdateMultiMode()
+        {
+            // TODO：多网卡模式实现（下阶段）
+            // 参考：GetAllNicBytesSent / GetAllNicBytesReceived
+        }
+
+        // ══════════════════════════════════════════════════════════════════════════
+        // 公用子方法
+        // ══════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// 【公用】数据初始化、时间计算、防突跳、差值计算、gifStep 调整。
+        /// 输入当前原始字节数，输出每秒发送/接收速率（bytes/s）。
+        /// Single/MultiMode 均可调用此方法，不包含任何网卡选取逻辑。
+        /// </summary>
+        /// <param name="bytesSent">本次采样的已发送总字节数</param>
+        /// <param name="bytesRecv">本次采样的已接收总字节数</param>
+        /// <param name="netSendPerSec">输出：发送速率 (bytes/s)</param>
+        /// <param name="netRecvPerSec">输出：接收速率 (bytes/s)</param>
+        private void CalcSpeedAndGifStep(
+            long bytesSent, long bytesRecv,
+            out long netSendPerSec, out long netRecvPerSec)
+        {
+            // ── 功能4：时间间隔计算 ───────────────────────────────────────────────
+            var now = DateTime.UtcNow;
+            double deltaSeconds = 1.0; // 默认 1s，适用于首次采样或回退情况
+            if (prevSampleTime != DateTime.MinValue)
             {
-                var nic = nicArr[ComboBox.SelectedIndex];
-                var stats = nic.GetIPv4Statistics();
-                long bytesSent = stats.BytesSent;
-                long bytesRecv = stats.BytesReceived;
+                deltaSeconds = (now - prevSampleTime).TotalSeconds;
+                if (deltaSeconds <= 0) deltaSeconds = 1.0;
+            }
+            prevSampleTime = now;
 
-                long deltaSent = 0;
-                long deltaRecv = 0;
-                var now = DateTime.UtcNow;
-                double deltaSeconds = 1.0; // 默认 1s，适用于首次采样或回退情况
+            // ── 功能5：防数据突跳（切换网卡/首次启动时 delta 置零）─────────────
+            long deltaSent, deltaRecv;
+            if (SpeedCalcStart && InterfaceSelect == ComboBox.SelectedIndex)
+            {
+                deltaSent = bytesSent - prevBytesSent;
+                deltaRecv = bytesRecv - prevBytesRecv;
+            }
+            else
+            {
+                // 切换网卡或首次启动：将上次值初始化为当前值，本次速度显示为 0
+                SpeedCalcStart = true;
+                InterfaceSelect = ComboBox.SelectedIndex;
+                deltaSent = 0;
+                deltaRecv = 0;
+            }
 
-                if (prevSampleTime != DateTime.MinValue)
-                {
-                    deltaSeconds = (now - prevSampleTime).TotalSeconds;
-                    if (deltaSeconds <= 0) deltaSeconds = 1.0;
-                }
-                prevSampleTime = now;
-                if (SpeedCalcStart && InterfaceSelect == ComboBox.SelectedIndex)
-                {
-                    deltaSent = bytesSent - prevBytesSent;
-                    deltaRecv = bytesRecv - prevBytesRecv;
-                }
+            // 更新"前一次"采样值，供下次差值计算
+            prevBytesSent = bytesSent;
+            prevBytesRecv = bytesRecv;
+
+            // ── 功能6：将 delta 转为 bytes/s ────────────────────────────────────
+            netSendPerSec = (long)(deltaSent / deltaSeconds);
+            netRecvPerSec = (long)(deltaRecv / deltaSeconds);
+
+            // 根据下载速度调整 GIF 播放步进（速度越快动画越快）
+            const long OneMB = 1024 * 1024;
+            try
+            {
+                if (netRecvPerSec < OneMB)
+                    gifStep = 1;                    // < 1 MB/s：慢速
+                else if (netRecvPerSec < 10 * OneMB)
+                    gifStep = 2;                    // 1~10 MB/s：中速
                 else
+                    gifStep = 4;                    // > 10 MB/s：快速
+
+                if (gifStep < 1) gifStep = 1;
+            }
+            catch
+            {
+                // 保守：任何异常都不影响主流程，保留当前 gifStep
+            }
+        }
+
+        /// <summary>
+        /// 【公用】将计算好的速率写入速度标签 UI。
+        /// Single/MultiMode 均可调用。
+        /// </summary>
+        private void UpdateSpeedToUI(long netSendPerSec, long netRecvPerSec)
+        {
+            Lable_SpeedUP.Text   = FormatSpeed(netSendPerSec);
+            Lable_SpeedDown.Text = FormatSpeed(netRecvPerSec);
+        }
+
+        /// <summary>
+        /// 【公用】将速度数据归零（网卡无效或刷新时调用）。
+        /// </summary>
+        private void ResetSpeedData()
+        {
+            prevBytesSent = 0;
+            prevBytesRecv = 0;
+            Lable_SpeedUP.Text   = "  0B/S";
+            Lable_SpeedDown.Text = "  0B/S";
+        }
+
+        // ══════════════════════════════════════════════════════════════════════════
+        // SingleMode 独有：无网时网卡自动切换
+        // ══════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// 【SingleMode 独有】当上行 + 下行速率连续为 0 时，自动切换到下一块网卡。
+        /// 逻辑：连续 3 次为零 → 轮询各卡；轮询到头仍为零 → 检查网卡列表变化，变化则刷新，
+        /// 未变化则继续轮询（ZreoTimes 钳位防溢出）。
+        /// 受 <see cref="autoSwitchNicEnabled"/> 开关控制（下阶段绑定菜单）。
+        /// </summary>
+        private void AutoSwitchNicOnZeroSpeed_SingleMode(long netSendPerSec, long netRecvPerSec)
+        {
+            // autoSwitchNicEnabled 为 false 时禁用自动切换，仅重置计数
+            if (!autoSwitchNicEnabled)
+            {
+                ZreoTimes = 0;
+                return;
+            }
+
+            if (netRecvPerSec == 0 && netSendPerSec == 0)
+            {
+                ZreoTimes++;
+                if (ZreoTimes >= 3)
                 {
-                    // 切换网卡或首次启动：初始化，上次值设为当前值，避免突跳
-                    SpeedCalcStart = true;
-                    InterfaceSelect = ComboBox.SelectedIndex;
-                    deltaSent = 0;
-                    deltaRecv = 0;
-                }
-
-                // 更新"前一次"值（用于下一次差值计算）
-                prevBytesSent = bytesSent;
-                prevBytesRecv = bytesRecv;
-
-                // 将 delta 转为 字节/秒，按真实时间间隔计算，避免 BeginInvoke / UI 延迟导致误差
-                long netSendPerSec = (long)(deltaSent / deltaSeconds);
-                long netRecvPerSec = (long)(deltaRecv / deltaSeconds);
-
-                // 根据当前下载速度（bytes/s）调整 gifStep
-                const long OneMB = 1024 * 1024;
-                try
-                {
-                    if (netRecvPerSec < OneMB)
+                    if (ZreoTimes < nicArr.Length * 3)
                     {
-                        gifStep = 1;
+                        // 尚未轮询完一圈：切换到下一块网卡
+                        ComboBox.SelectedIndex = (ComboBox.SelectedIndex + 1) % nicArr.Length;
+                        ZreoTimes++;
                     }
-                    else if (netRecvPerSec < 10 * OneMB)
+                    else if (IsNetworkInterfaceListChanged())
                     {
-                        gifStep = 2;
+                        // 网卡列表已发生变化（如拔网线/插网卡）：重新初始化网卡列表
+                        ZreoTimes = 0;
+                        InitNetworkInterface();
                     }
                     else
                     {
-                        gifStep = 4;
-                    }
-
-                    if (gifStep < 1) gifStep = 1;
-                }
-                catch
-                {
-                    // 避免任何异常影响主流程，保留当前 gifStep
-                }
-
-                // 更新 UI：使用按秒速率显示
-                Lable_SpeedUP.Text = FormatSpeed(netSendPerSec);
-                Lable_SpeedDown.Text = FormatSpeed(netRecvPerSec);
-
-                if (netRecvPerSec == 0 && netSendPerSec == 0)
-                {
-                    ZreoTimes++;
-                    if (ZreoTimes >= 3)
-                    {
-                        if (ZreoTimes < nicArr.Length * 3)
-                        {
-                            ComboBox.SelectedIndex = (ComboBox.SelectedIndex + 1) % nicArr.Length;
-                            ZreoTimes++;
-                        }
-                        else if (IsNetworkInterfaceListChanged())
-                        {
-                            ZreoTimes = 0;
-                            InitNetworkInterface();
-                        }
-                        else
-                        {
-                            ComboBox.SelectedIndex = (ComboBox.SelectedIndex + 1) % nicArr.Length;
-                            ZreoTimes = nicArr.Length * 3; //防止溢出
-                        }
+                        // 轮询一圈后仍为零且网卡列表未变：继续轮询，钳位防溢出
+                        ComboBox.SelectedIndex = (ComboBox.SelectedIndex + 1) % nicArr.Length;
+                        ZreoTimes = nicArr.Length * 3;
                     }
                 }
-                else
-                {
-                    ZreoTimes = 0;
-                }
-
+            }
+            else
+            {
+                // 速度非零：重置连续零计数
+                ZreoTimes = 0;
             }
         }
+
+
 
 
         private string FormatSpeed(long bytes)
