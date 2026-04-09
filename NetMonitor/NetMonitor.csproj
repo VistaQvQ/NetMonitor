@@ -126,6 +126,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NativeApi.cs" />
     <Compile Include="NetMonitor.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -157,7 +158,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="NetMonitor.ico" />
-    <None Include="Resources\Image1.bmp" />
     <None Include="app.manifest" />
     <None Include="packages.config" />
     <EmbeddedResource Include="Properties\Settings.settings">
