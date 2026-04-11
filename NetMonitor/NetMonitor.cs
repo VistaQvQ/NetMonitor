@@ -11,7 +11,7 @@ namespace NetMonitor
 {
     public partial class NetMonitor : Form
     {
-        // ── 网卡与速度计算 ─────────────────────────────────────────────────────────
+        //网卡与速度计算 
         private NetworkInterface[] nicArr;          // 当前可用网卡列表
         private int  interfaceSelect  = 0;          // 上次选中的网卡下标（防突跳用）
         private int  zeroSpeedCount   = 0;          // 连续零速次数（自动切卡阈值）
@@ -20,17 +20,17 @@ namespace NetMonitor
         private long prevBytesRecv    = 0;
         private DateTime prevSampleTime = DateTime.MinValue;
 
-        // ── GIF 背景动画 ───────────────────────────────────────────────────────────
+        //GIF 背景动画 
         private System.Windows.Forms.Timer gifTimer;
         private Image[] gifFrames;
         private int gifFrameIndex = 0;
         private int gifFrameCount = 0;
         private int gifStep       = 1;   // GIF 步进：1=慢 / 2=中 / 4=快
 
-        // ── 系统定时器 ────────────────────────────────────────────────────────────
+        // 系统定时器 
         private System.Timers.Timer updateTimer;
 
-        // ── 窗体状态 ──────────────────────────────────────────────────────────────
+        // 窗体状态
         private bool formInitialized = false;   // 幂等保护：OnShown 只初始化一次
 
         /// <summary>系统托盘图标，与右键菜单 Menu 共用同一 ContextMenuStrip 实例。</summary>
@@ -176,10 +176,10 @@ namespace NetMonitor
                 return;
             }
 
-            // ── 公用：全屏判定 + 窗体可见性 ──────────────────────────────────────
+            // 全屏判定 + 窗体可见性 
             UpdateVisibility();
 
-            // ── 按模式分发 ────────────────────────────────────────────────────────
+            //按模式分发 
             if (temp＿isMultiMode)
                 UpdateMultiMode();
             else
@@ -197,7 +197,7 @@ namespace NetMonitor
         }
         private void UpdateSingleMode()
         {
-            // 网卡为空数据判定 + 网卡刷新（SingleMode）───────────────
+            // 网卡为空数据判定 + 网卡刷新（SingleMode
             // nicArr 为空说明网络接口尚未加载或全部失效，重置速度并重新初始化
             if (nicArr == null || nicArr.Length == 0)
             {
@@ -206,7 +206,7 @@ namespace NetMonitor
                 return;
             }
 
-            // 防越界判定（SingleMode）──────────────────────────────
+            // 防越界判定（SingleMode）
             // ComboBox 下标越界时跳过本次更新，避免数组越界异常
             if (ComboBox.SelectedIndex < 0 || ComboBox.SelectedIndex >= nicArr.Length)
                 return;
@@ -221,10 +221,10 @@ namespace NetMonitor
                 bytesSent, bytesRecv,
                 out long netSendPerSec, out long netRecvPerSec);
 
-            // UI 更新（公用逻辑）────────────────────────────────────────
+            // UI 更新（公用逻辑）
             UpdateSpeedToUI(netSendPerSec, netRecvPerSec);
 
-            // 无网时网卡自动切换（）──────────────────────
+            // 无网时网卡自动切换（）
             AutoSwitchNicOnZeroSpeed_SingleMode(netSendPerSec, netRecvPerSec);
         }
 
@@ -254,7 +254,7 @@ namespace NetMonitor
 
             // 防突跳：切换网卡或首次采样时将 delta 置零
             long deltaSent, deltaRecv;
-            if (speedCalcReady && interfaceSelect == ComboBox.SelectedIndex)
+            if (speedCalcReady && interfaceSelect == ComboBox.SelectedIndex)//这里在多网卡模式下应当注意下表问题
             {
                 deltaSent = bytesSent - prevBytesSent;
                 deltaRecv = bytesRecv - prevBytesRecv;
@@ -329,11 +329,12 @@ namespace NetMonitor
                         ComboBox.SelectedIndex = (ComboBox.SelectedIndex + 1) % nicArr.Length;
                         zeroSpeedCount++;
                     }
-                    else if (IsNetworkInterfaceListChanged())
+                    else if (isNetworkInterfaceListChanged())
                     {
                         // 网卡列表变化（插拔等），重新初始化
                         zeroSpeedCount = 0;
                         InitNetworkInterface();
+                        ComboBox.SelectedIndex = 0;// 重置到第一块，等待下一轮速度更新后再判断是否继续切卡
                     }
                     else
                     {
@@ -378,7 +379,7 @@ namespace NetMonitor
             }
         }
 
-        private bool IsVirtualNetworkInterface(NetworkInterface nic)
+        private bool isVirtualNetworkInterface(NetworkInterface nic)
         {
             if (nic == null) return true;
 
@@ -445,7 +446,7 @@ namespace NetMonitor
                 var all = NetworkInterface.GetAllNetworkInterfaces();
                 nicArr = all.Where(nic =>
                     nic.OperationalStatus == OperationalStatus.Up &&
-                    !IsVirtualNetworkInterface(nic)).ToArray();
+                    !isVirtualNetworkInterface(nic)).ToArray();
 
                 foreach (var nic in nicArr)
                     ComboBox.Items.Add(nic.Name);
@@ -610,14 +611,14 @@ namespace NetMonitor
             }
             return true;
         }
-        private bool IsNetworkInterfaceListChanged()
+        private bool isNetworkInterfaceListChanged()
         {
             try
             {
                 var currentNics = NetworkInterface.GetAllNetworkInterfaces();
                 var filteredCurrentNics = currentNics.Where(nic =>
                     nic.OperationalStatus == OperationalStatus.Up &&
-                    !IsVirtualNetworkInterface(nic)).ToArray();
+                    !isVirtualNetworkInterface(nic)).ToArray();
                 if (!CompareNetworkLists(filteredCurrentNics, nicArr))
                 {
                     return true;
