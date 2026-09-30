@@ -37,6 +37,9 @@ publish/
 *.idb
 *.ilk
 
+# ai文件
+.workbuddy/
+
 # 其他
 *.log
 *.tmp

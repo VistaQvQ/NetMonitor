@@ -58,5 +58,17 @@ namespace NetMonitor.Properties {
                 this["MultNicMode"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string MultiNicSelectedIds {
+            get {
+                return ((string)(this["MultiNicSelectedIds"]));
+            }
+            set {
+                this["MultiNicSelectedIds"] = value;
+            }
+        }
     }
 }
