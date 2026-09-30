@@ -1,5 +1,6 @@
 ﻿using NetMonitor.Properties;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace NetMonitor
     {
         //网卡与速度计算 
         private NetworkInterface[] nicArr;          // 当前可用网卡列表
-        private int  interfaceSelect  = 0;          // 上次选中的网卡下标（防突跳用）
+        private string speedSampleKey = null;       // 当前采样键（单网卡=选中网卡Id，多网卡=网卡集合Id），防突跳用
         private int  zeroSpeedCount   = 0;          // 连续零速次数（自动切卡阈值）
         private bool speedCalcReady   = false;      // 首次采样初始化标志
         private long prevBytesSent    = 0;
@@ -36,8 +37,11 @@ namespace NetMonitor
         /// <summary>系统托盘图标，与右键菜单 Menu 共用同一 ContextMenuStrip 实例。</summary>
         private NotifyIcon trayIcon;
 
-        /// <summary>临时：false = 单网卡模式，true = 多网卡模式。下阶段改为持久化设置。</summary>
-        private bool temp＿isMultiMode = false;
+        /// <summary>多网卡模式开关：true = 累加所有网卡，false = 单网卡模式。状态持久化到用户设置。</summary>
+        private bool isMultiMode = false;
+
+        /// <summary>多网卡模式下参与累加的网卡 Id 集合；null 表示未自定义（默认全选）。</summary>
+        private HashSet<string> multiNicSelectedIds = null;
 
         /// <summary>无网自动切卡开关。下阶段绑定到菜单项，目前默认启用。</summary>
         private bool autoSwitchNicEnabled = true;
@@ -62,6 +66,9 @@ namespace NetMonitor
             InitAutoRunMenuItem();
 #endif
             formInitialized = true;
+
+            // 订阅网卡变动事件：插拔/启停网卡时自动刷新网卡列表
+            NetworkChange.NetworkAddressChanged += OnNetworkAddressChanged;
 
             // 托盘图标：components 托管生命周期；Menu 复用同一实例保持菜单状态同步
             trayIcon = new NotifyIcon(this.components)
@@ -93,7 +100,7 @@ namespace NetMonitor
 
         private void SetGifBackground()
         {
-            Image gif = Properties.Resources.Cadogt;
+            Image gif = Properties.Resources.Catdog;
             if (gif == null) return;
 
             // 清理旧计时器
@@ -180,7 +187,7 @@ namespace NetMonitor
             UpdateVisibility();
 
             //按模式分发 
-            if (temp＿isMultiMode)
+            if (isMultiMode)
                 UpdateMultiMode();
             else
                 UpdateSingleMode();
@@ -230,17 +237,39 @@ namespace NetMonitor
 
         private void UpdateMultiMode()
         {
-            // TODO：多网卡模式实现（下阶段）
-            // 参考：GetAllNicBytesSent / GetAllNicBytesReceived
+            // 多网卡模式：累加用户筛选出的网卡流量（参照 neobox speedbox 的汇总逻辑）
+            if (nicArr == null || nicArr.Length == 0)
+            {
+                ResetSpeedData();
+                InitNetworkInterface();
+                return;
+            }
+
+            var selected = GetSelectedNics();
+            long bytesSent = GetAllNicBytesSent(selected);
+            long bytesRecv = GetAllNicBytesReceived(selected);
+
+            CalcSpeedAndGifStep(bytesSent, bytesRecv, out long netSendPerSec, out long netRecvPerSec);
+            UpdateSpeedToUI(netSendPerSec, netRecvPerSec);
+        }
+
+        /// <summary>多网卡模式下参与累加的网卡集合；未自定义（null）时返回全部网卡。</summary>
+        private NetworkInterface[] GetSelectedNics()
+        {
+            if (nicArr == null || nicArr.Length == 0)
+                return new NetworkInterface[0];
+
+            if (multiNicSelectedIds == null)
+                return nicArr;  // 未自定义 → 全选
+
+            return nicArr.Where(n => multiNicSelectedIds.Contains(n.Id)).ToArray();
         }
 
         /// <summary>
         /// 时间间隔计算 → 防突跳 → 差值转速率 → gifStep 调整。
         /// 输出 <paramref name="netSendPerSec"/> / <paramref name="netRecvPerSec"/>（bytes/s）。
         /// </summary>
-        private void CalcSpeedAndGifStep(
-            long bytesSent, long bytesRecv,
-            out long netSendPerSec, out long netRecvPerSec)
+        private void CalcSpeedAndGifStep(long bytesSent, long bytesRecv,out long netSendPerSec, out long netRecvPerSec)
         {
             // 时间间隔（首次或回退时取 1s）
             var now = DateTime.UtcNow;
@@ -252,9 +281,10 @@ namespace NetMonitor
             }
             prevSampleTime = now;
 
-            // 防突跳：切换网卡或首次采样时将 delta 置零
+            // 防突跳：采样源（单网卡/多网卡集合）变化或首次采样时，将 delta 置零
             long deltaSent, deltaRecv;
-            if (speedCalcReady && interfaceSelect == ComboBox.SelectedIndex)//这里在多网卡模式下应当注意下表问题
+            string sampleKey = BuildSpeedSampleKey();
+            if (speedCalcReady && sampleKey == speedSampleKey)
             {
                 deltaSent = bytesSent - prevBytesSent;
                 deltaRecv = bytesRecv - prevBytesRecv;
@@ -262,7 +292,7 @@ namespace NetMonitor
             else
             {
                 speedCalcReady = true;
-                interfaceSelect = ComboBox.SelectedIndex;
+                speedSampleKey = sampleKey;
                 deltaSent = 0;
                 deltaRecv = 0;
             }
@@ -445,7 +475,7 @@ namespace NetMonitor
 
                 var all = NetworkInterface.GetAllNetworkInterfaces();
                 nicArr = all.Where(nic =>
-                    nic.OperationalStatus == OperationalStatus.Up &&
+                    nic.OperationalStatus == OperationalStatus.Up && //这里的OperationalStatus.Up 可能在多网卡模式下导致某些网卡无法显示，后续可以考虑放宽条件或提供更多选项
                     !isVirtualNetworkInterface(nic)).ToArray();
 
                 foreach (var nic in nicArr)
@@ -465,6 +495,9 @@ namespace NetMonitor
                 ComboBox.Items.Clear();
                 ComboBox.Text = "获取网卡失败";
             }
+
+            // 网卡列表变化后，同步重建多网卡筛选子菜单
+            BuildMultiNicFilterMenu();
         }
         // Load 在消息循环启动前触发，不能 Invoke，直接调用 SetGifBackground 即可。
         // 定时器与开机自启初始化移至 OnShown。
@@ -631,6 +664,44 @@ namespace NetMonitor
             return false;
         }
 
+        /// <summary>网卡变动事件回调：切回 UI 线程后刷新网卡列表。</summary>
+        private void OnNetworkAddressChanged(object sender, EventArgs e)
+        {
+            if (this.IsHandleCreated && !this.IsDisposed)
+            {
+                try { this.BeginInvoke((Action)RefreshNetworkInterfaceList); }
+                catch (InvalidOperationException) { /* 句柄已销毁，忽略 */ }
+            }
+        }
+
+        /// <summary>网卡列表变化时重新初始化，并尽量恢复原选中网卡（按 Id 匹配）。</summary>
+        private void RefreshNetworkInterfaceList()
+        {
+            // 列表未实际变化（如仅 IP 地址变化）则不处理，避免频繁重置采样导致速率归零
+            if (!isNetworkInterfaceListChanged())
+                return;
+
+            // 保存当前选中网卡 Id，供重新初始化后恢复
+            string selectedId = null;
+            if (nicArr != null && ComboBox.SelectedIndex >= 0 && ComboBox.SelectedIndex < nicArr.Length)
+                selectedId = nicArr[ComboBox.SelectedIndex].Id;
+
+            InitNetworkInterface();  // 内部会 speedCalcReady = false，重置采样避免速率突跳
+
+            // 恢复原选中网卡；若已不存在则保持默认（第 0 项）
+            if (selectedId != null && nicArr != null)
+            {
+                for (int i = 0; i < nicArr.Length; i++)
+                {
+                    if (nicArr[i].Id == selectedId)
+                    {
+                        ComboBox.SelectedIndex = i;
+                        break;
+                    }
+                }
+            }
+        }
+
         // 全屏判定：刚启动进程（< 3s）或主窗口未就绪时统一忽略，防止 splash / launcher 误触发
         private const double IgnoreNewProcessSeconds = 3.0;
 
@@ -775,14 +846,115 @@ namespace NetMonitor
 
                 this.ShowInFullScreen_ToolStripMenuItem.Checked = Properties.Settings.Default.ShowInFullScreen;
                 this.MultNicMode_ToolStripMenuItem.Checked      = Properties.Settings.Default.MultNicMode;
+
+                // 读取多网卡筛选网卡集合；空串 = 未自定义（全选）
+                string savedIds = Properties.Settings.Default.MultiNicSelectedIds;
+                if (!string.IsNullOrEmpty(savedIds))
+                    multiNicSelectedIds = new HashSet<string>(
+                        savedIds.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries));
+                else
+                    multiNicSelectedIds = null;
             }
             catch (Exception ex)
             {
                 this.Location = new System.Drawing.Point(710, 10);
                 this.ShowInFullScreen_ToolStripMenuItem.Checked = false;
                 this.MultNicMode_ToolStripMenuItem.Checked      = false;
+                multiNicSelectedIds = null;
                 Debug.WriteLine("读取用户设置失败: " + ex.Message);
             }
+
+            // 恢复多网卡模式开关状态，并据此调整网卡选择菜单可用性
+            isMultiMode = this.MultNicMode_ToolStripMenuItem.Checked;
+            UpdateInterfaceMenuState();
+
+            // 按持久化的勾选状态刷新多网卡筛选子菜单
+            BuildMultiNicFilterMenu();
+        }
+
+        /// <summary>切换多网卡/单网卡模式。切换后立即重置采样并持久化设置。</summary>
+        private void MultNicMode_ToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            isMultiMode = this.MultNicMode_ToolStripMenuItem.Checked;
+            // 模式切换后采样基数不同，重置采样避免速率突跳
+            speedCalcReady = false;
+            UpdateInterfaceMenuState();
+            // 开关变化 → 重建/清空筛选子菜单（未开启时不显示）
+            BuildMultiNicFilterMenu();
+            WriteUserSettings();
+        }
+
+        /// <summary>多网卡模式下禁用网卡选择菜单（累加筛选网卡，无需手动选择）。</summary>
+        private void UpdateInterfaceMenuState()
+        {
+            this.Interface_Menu.Enabled = !isMultiMode;
+        }
+
+        /// <summary>重建「多网卡模式」的筛选子菜单：每块网卡一个勾选项，悬停展开。仅多网卡模式开启时显示。</summary>
+        private void BuildMultiNicFilterMenu()
+        {
+            MultNicMode_ToolStripMenuItem.DropDownItems.Clear();
+
+            // 多网卡模式未开启时不显示筛选子菜单
+            if (!isMultiMode)
+                return;
+
+            if (nicArr == null || nicArr.Length == 0)
+                return;
+
+            foreach (var nic in nicArr)
+            {
+                // null（未自定义）视为全选
+                bool isChecked = multiNicSelectedIds == null || multiNicSelectedIds.Contains(nic.Id);
+                var item = new ToolStripMenuItem
+                {
+                    Text = nic.Name,
+                    CheckOnClick = true,
+                    Checked = isChecked,
+                    Tag = nic.Id
+                };
+                item.CheckedChanged += MultiNicFilterItem_CheckedChanged;
+                MultNicMode_ToolStripMenuItem.DropDownItems.Add(item);
+            }
+        }
+
+        /// <summary>筛选子菜单勾选变化：更新选中集合并立即持久化。</summary>
+        private void MultiNicFilterItem_CheckedChanged(object sender, EventArgs e)
+        {
+            var item = sender as ToolStripMenuItem;
+            string id = item?.Tag as string;
+            if (id == null) return;
+
+            // 首次操作：从「全选」基线转为具体集合
+            if (multiNicSelectedIds == null)
+                multiNicSelectedIds = new HashSet<string>(
+                    nicArr != null ? nicArr.Select(n => n.Id) : Enumerable.Empty<string>());
+
+            if (item.Checked)
+                multiNicSelectedIds.Add(id);
+            else
+                multiNicSelectedIds.Remove(id);
+
+            // 筛选集合变化 → 重置采样避免速率突跳
+            speedCalcReady = false;
+            WriteUserSettings();
+        }
+
+        /// <summary>构建当前采样键：单网卡 = 选中网卡 Id，多网卡 = 筛选网卡集合 Id。</summary>
+        private string BuildSpeedSampleKey()
+        {
+            if (isMultiMode)
+            {
+                var selected = GetSelectedNics();
+                if (selected.Length == 0)
+                    return "M:empty";
+                var ids = selected.Select(n => n.Id).OrderBy(x => x).ToArray();
+                return "M:" + string.Join(",", ids);
+            }
+
+            if (nicArr == null || ComboBox.SelectedIndex < 0 || ComboBox.SelectedIndex >= nicArr.Length)
+                return "S:empty";
+            return "S:" + nicArr[ComboBox.SelectedIndex].Id;
         }
 
         private void WriteUserSettings()
@@ -790,12 +962,17 @@ namespace NetMonitor
             Properties.Settings.Default.WinowLocation   = this.Location;
             Properties.Settings.Default.ShowInFullScreen = this.ShowInFullScreen_ToolStripMenuItem.Checked;
             Properties.Settings.Default.MultNicMode      = this.MultNicMode_ToolStripMenuItem.Checked;
+            Properties.Settings.Default.MultiNicSelectedIds =
+                multiNicSelectedIds == null ? "" : string.Join(",", multiNicSelectedIds);
             Properties.Settings.Default.Save();
         }
 
         private void NetMonitor_FormClosing(object sender, FormClosingEventArgs e)
         {
             WriteUserSettings();
+
+            // 取消网卡变动订阅，防止退出后残留引用
+            NetworkChange.NetworkAddressChanged -= OnNetworkAddressChanged;
 
             // 退出前显式隐藏托盘图标，防止幽灵图标残留
             if (trayIcon != null)
@@ -809,37 +986,25 @@ namespace NetMonitor
         {
             long total = 0;
             foreach (var nic in nics)
-            {
-                try
-                {
-                    total += nic.GetIPv4Statistics().BytesSent;
-                }
-                catch { }
-            }
+                total += GetSingleNicBytesSent(nic);
             return total;
         }
         private long GetAllNicBytesReceived(NetworkInterface[] nics)
         {
             long total = 0;
             foreach (var nic in nics)
-            {
-                try
-                {
-                    total += nic.GetIPv4Statistics().BytesReceived;
-                }
-                catch { }
-            }
+                total += GetSingleNicBytesReceived(nic);
             return total;
         }
         private long GetSingleNicBytesSent(NetworkInterface nic)
         {
-            try   { return nic.GetIPv4Statistics().BytesSent; }
+            try   { return nic.GetIPStatistics().BytesSent; }
             catch { return 0; }
         }
 
         private long GetSingleNicBytesReceived(NetworkInterface nic)
         {
-            try   { return nic.GetIPv4Statistics().BytesReceived; }
+            try   { return nic.GetIPStatistics().BytesReceived; }
             catch { return 0; }
         }
     }

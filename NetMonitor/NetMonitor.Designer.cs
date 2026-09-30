@@ -87,6 +87,7 @@
             this.MultNicMode_ToolStripMenuItem.CheckOnClick = true;
             this.MultNicMode_ToolStripMenuItem.Name = "MultNicMode_ToolStripMenuItem";
             resources.ApplyResources(this.MultNicMode_ToolStripMenuItem, "MultNicMode_ToolStripMenuItem");
+            this.MultNicMode_ToolStripMenuItem.Click += new System.EventHandler(this.MultNicMode_ToolStripMenuItem_Click);
             // 
             // ShowInFullScreen_ToolStripMenuItem
             // 
