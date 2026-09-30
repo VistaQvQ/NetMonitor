@@ -39,6 +39,7 @@ publish/
 
 # ai文件
 .workbuddy/
+.learnings/
 
 # 其他
 *.log
