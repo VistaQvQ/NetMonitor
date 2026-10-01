@@ -220,7 +220,7 @@
     <value>楷体, 10.5pt, style=Bold</value>
   </data>
   <data name="Lable_SpeedUP.Location" type="System.Drawing.Point, System.Drawing">
-    <value>116, 10</value>
+    <value>116, 11</value>
   </data>
   <data name="Lable_SpeedUP.Size" type="System.Drawing.Size, System.Drawing">
     <value>55, 14</value>
@@ -253,7 +253,7 @@
     <value>楷体, 10.5pt, style=Bold</value>
   </data>
   <data name="labeldwon.Location" type="System.Drawing.Point, System.Drawing">
-    <value>71, 32</value>
+    <value>74, 32</value>
   </data>
   <data name="labeldwon.Size" type="System.Drawing.Size, System.Drawing">
     <value>52, 14</value>
@@ -286,7 +286,7 @@
     <value>楷体, 10.5pt, style=Bold</value>
   </data>
   <data name="labelup.Location" type="System.Drawing.Point, System.Drawing">
-    <value>71, 10</value>
+    <value>74, 11</value>
   </data>
   <data name="labelup.Size" type="System.Drawing.Size, System.Drawing">
     <value>52, 14</value>
@@ -319,7 +319,7 @@
     <value>0, 0</value>
   </data>
   <data name="pictureBox.Size" type="System.Drawing.Size, System.Drawing">
-    <value>59, 56</value>
+    <value>56, 56</value>
   </data>
   <data name="pictureBox.SizeMode" type="System.Windows.Forms.PictureBoxSizeMode, System.Windows.Forms">
     <value>StretchImage</value>
