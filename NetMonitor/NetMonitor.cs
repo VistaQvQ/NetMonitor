@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Timers;
@@ -59,6 +60,7 @@ namespace NetMonitor
             base.OnShown(e);
             if (formInitialized) return;
 
+            InitGlassPanel();
             InitNetworkInterface();
             InitializeTimer();
             ReadUserSettings();
@@ -97,6 +99,71 @@ namespace NetMonitor
                 catch (InvalidOperationException) { /* 句柄已销毁，忽略 */ }
             }
         }
+
+        #region 液态玻璃底（替代 img_background 位图，矢量抗锯齿）
+
+        /// <summary>
+        /// 初始化玻璃底自绘：
+        /// 1. panel 开双缓冲（Panel 默认不开启，防重绘闪烁）；
+        /// 2. 挂 Paint 事件矢量绘制胶囊形玻璃底。
+        /// 注意：不使用 Region/SetWindowRgn、不使用 WS_EX_LAYERED 逐像素透明、
+        /// 不使用 WS_EX_TRANSPARENT —— 透明机制仍为原有的 TransparencyKey 色键，
+        /// 鼠标命中行为与改造前完全一致，不会引入穿透/不可选中问题。
+        /// </summary>
+        private void InitGlassPanel()
+        {
+            typeof(Panel).GetProperty("DoubleBuffered",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                ?.SetValue(panel, true, null);
+
+            panel.Paint += Panel_Paint;
+        }
+
+        /// <summary>构造胶囊形（两端半圆）路径。</summary>
+        private static GraphicsPath BuildCapsulePath(RectangleF r)
+        {
+            var path = new GraphicsPath();
+            float d = r.Height;                      // 圆角直径 = 高度 → 完全胶囊形
+            path.AddArc(r.X, r.Y, d, d, 90, 180);    // 左半圆
+            path.AddArc(r.Right - d, r.Y, d, d, 270, 180); // 右半圆
+            path.CloseFigure();
+            return path;
+        }
+
+        /// <summary>
+        /// 玻璃底绘制。左侧 pictureBox(GIF) 区域不绘制 → 保持透明背景；
+        /// 右侧文字区绘制纯白胶囊 + 纯黑描边，描边之外仅剩色键透明色。
+        /// 色键约束：panel 背景色 SystemColors.Control（默认 240,240,240）是透明键，
+        /// 白色内部（255）与纯黑描边（0）均远离该值，不会被误抠透明。
+        /// </summary>
+        private void Panel_Paint(object sender, PaintEventArgs e)
+        {
+            var g = e.Graphics;
+            g.SmoothingMode = SmoothingMode.HighQuality;   // 关闭抗锯齿：消除色键透明下的白边
+
+            const float gap      = 2f;    // 胶囊与窗体右缘的缝隙
+            const float insetY   = 4f;    // 上下留白
+            const float capWidth = 130f;  // 胶囊绘图区域长度（宽度）
+            float left = panel.Width - capWidth - gap;   // 右缘距窗体右缘 gap，长度固定 136
+            var r = new RectangleF(left, insetY, capWidth, panel.Height - insetY * 2);
+
+            using (var path = BuildCapsulePath(r))
+            {
+                // 纯白内部（不穿越色键值 240）
+                using (var brush = new SolidBrush(Color.White))
+                {
+                    g.FillPath(brush, path);
+                }
+
+                // 纯黑描边（最外圈；外圈之外仅透明色，无其他装饰色）
+                using (var pen = new Pen(Color.Black, 1.75f))
+                {
+                    g.DrawPath(pen, path);
+                }
+            }
+        }
+
+        #endregion
 
         private void SetGifBackground()
         {
