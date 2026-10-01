@@ -120,7 +120,6 @@
             // panel
             // 
             this.panel.BackColor = System.Drawing.SystemColors.Control;
-            this.panel.BackgroundImage = global::NetMonitor.Properties.Resources.img_background;
             resources.ApplyResources(this.panel, "panel");
             this.panel.ContextMenuStrip = this.Menu;
             this.panel.Controls.Add(this.Lable_SpeedDown);
