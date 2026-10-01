@@ -184,7 +184,6 @@
             this.Name = "NetMonitor";
             this.ShowInTaskbar = false;
             this.TopMost = true;
-            this.TransparencyKey = System.Drawing.SystemColors.Control;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.NetMonitor_FormClosing);
             this.Load += new System.EventHandler(this.NetMonitor_Load);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.NetMonitor_MouseDown);

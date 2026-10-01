@@ -116,5 +116,69 @@ namespace NetMonitor
         [DllImport("dwmapi.dll")]
         internal static extern int DwmGetWindowAttribute(
             IntPtr hwnd, int dwAttribute, out int pvAttribute, int cbAttribute);
+
+        // ══════════════════════════════════════════════════════════════════════════
+        // 分层窗口（Per-Pixel Alpha 透明，替代 TransparencyKey 色键）
+        // ══════════════════════════════════════════════════════════════════════════
+
+        // UpdateLayeredWindow 标志
+        internal const int  ULW_ALPHA      = 0x00000002;
+        internal const byte AC_SRC_OVER    = 0x00;
+        internal const byte AC_SRC_ALPHA   = 0x01;   // 位图带 Alpha 通道，按像素混合
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct POINT
+        {
+            public int X, Y;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct SIZE
+        {
+            public int cx, cy;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct BLENDFUNCTION
+        {
+            public byte BlendOp;
+            public byte BlendFlags;
+            public byte SourceConstantAlpha;
+            public byte AlphaFormat;
+        }
+
+        /// <summary>以每像素 Alpha 通道呈现分层窗口内容（真透明、无白边、支持半透明）。</summary>
+        [DllImport("user32.dll", SetLastError = true)]
+        internal static extern bool UpdateLayeredWindow(
+            IntPtr hwnd, IntPtr hdcDst, ref POINT pptDst, ref SIZE psize,
+            IntPtr hdcSrc, ref POINT pptSrc, int crKey, ref BLENDFUNCTION pblend, int dwFlags);
+
+        /// <summary>获取窗口或屏幕设备上下文（hwnd 为 0 表示整个屏幕）。</summary>
+        [DllImport("user32.dll")]
+        internal static extern IntPtr GetDC(IntPtr hWnd);
+
+        /// <summary>释放设备上下文。</summary>
+        [DllImport("user32.dll")]
+        internal static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
+
+        // ══════════════════════════════════════════════════════════════════════════
+        // gdi32.dll（位图 → 兼容 DC，供 UpdateLayeredWindow 使用）
+        // ══════════════════════════════════════════════════════════════════════════
+
+        /// <summary>创建与指定 DC 兼容的内存 DC。</summary>
+        [DllImport("gdi32.dll")]
+        internal static extern IntPtr CreateCompatibleDC(IntPtr hdc);
+
+        /// <summary>将对象选入 DC，返回被替换的旧对象。</summary>
+        [DllImport("gdi32.dll")]
+        internal static extern IntPtr SelectObject(IntPtr hdc, IntPtr hObject);
+
+        /// <summary>删除 GDI 对象（位图等）。</summary>
+        [DllImport("gdi32.dll")]
+        internal static extern bool DeleteObject(IntPtr hObject);
+
+        /// <summary>删除设备上下文。</summary>
+        [DllImport("gdi32.dll")]
+        internal static extern bool DeleteDC(IntPtr hdc);
     }
 }

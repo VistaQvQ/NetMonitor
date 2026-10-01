@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.Drawing.Text;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Timers;
@@ -35,6 +37,9 @@ namespace NetMonitor
         // 窗体状态
         private bool formInitialized = false;   // 幂等保护：OnShown 只初始化一次
 
+        /// <summary>per-pixel alpha 渲染画布（复用，避免每帧重新分配内存）。</summary>
+        private Bitmap renderBitmap;
+
         /// <summary>系统托盘图标，与右键菜单 Menu 共用同一 ContextMenuStrip 实例。</summary>
         private NotifyIcon trayIcon;
 
@@ -52,6 +57,17 @@ namespace NetMonitor
             InitializeComponent();
         }
 
+        /// <summary>分层窗口：启用 WS_EX_LAYERED 以支持 UpdateLayeredWindow 逐像素 alpha 透明。</summary>
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                var cp = base.CreateParams;
+                cp.ExStyle |= NativeApi.WS_EX_LAYERED;
+                return cp;
+            }
+        }
+
         // OnShown 说明：
         //   Load/构造阶段句柄未就绪，且 Application.Run 尚未启动，
         //   耗时操作（注册表/网卡枚举）放到 OnShown 避免阻塞首屏渲染。
@@ -60,7 +76,6 @@ namespace NetMonitor
             base.OnShown(e);
             if (formInitialized) return;
 
-            InitGlassPanel();
             InitNetworkInterface();
             InitializeTimer();
             ReadUserSettings();
@@ -68,6 +83,9 @@ namespace NetMonitor
             InitAutoRunMenuItem();
 #endif
             formInitialized = true;
+
+            // 屏蔽子控件渲染：分层窗口下不渲染子控件，它们仅作数据源（Label.Text/Font/Location）
+            panel.Visible = false;
 
             // 订阅网卡变动事件：插拔/启停网卡时自动刷新网卡列表
             NetworkChange.NetworkAddressChanged += OnNetworkAddressChanged;
@@ -81,6 +99,9 @@ namespace NetMonitor
                 ContextMenuStrip = this.Menu
             };
             trayIcon.DoubleClick += (s, ev) => { this.Visible = !this.Visible; };
+
+            // 首次渲染：呈现初始画面（GIF 首帧 + 胶囊 + 文字）
+            RenderFrame();
         }
 
         private void InitializeTimer()
@@ -100,24 +121,7 @@ namespace NetMonitor
             }
         }
 
-        #region 液态玻璃底（替代 img_background 位图，矢量抗锯齿）
-
-        /// <summary>
-        /// 初始化玻璃底自绘：
-        /// 1. panel 开双缓冲（Panel 默认不开启，防重绘闪烁）；
-        /// 2. 挂 Paint 事件矢量绘制胶囊形玻璃底。
-        /// 注意：不使用 Region/SetWindowRgn、不使用 WS_EX_LAYERED 逐像素透明、
-        /// 不使用 WS_EX_TRANSPARENT —— 透明机制仍为原有的 TransparencyKey 色键，
-        /// 鼠标命中行为与改造前完全一致，不会引入穿透/不可选中问题。
-        /// </summary>
-        private void InitGlassPanel()
-        {
-            typeof(Panel).GetProperty("DoubleBuffered",
-                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
-                ?.SetValue(panel, true, null);
-
-            panel.Paint += Panel_Paint;
-        }
+        #region Per-Pixel Alpha 渲染（UpdateLayeredWindow，替代色键透明）
 
         /// <summary>构造胶囊形（两端半圆）路径。</summary>
         private static GraphicsPath BuildCapsulePath(RectangleF r)
@@ -131,35 +135,121 @@ namespace NetMonitor
         }
 
         /// <summary>
-        /// 玻璃底绘制。左侧 pictureBox(GIF) 区域不绘制 → 保持透明背景；
-        /// 右侧文字区绘制纯白胶囊 + 纯黑描边，描边之外仅剩色键透明色。
-        /// 色键约束：panel 背景色 SystemColors.Control（默认 240,240,240）是透明键，
-        /// 白色内部（255）与纯黑描边（0）均远离该值，不会被误抠透明。
+        /// 每帧合成：GIF 当前帧 + 玻璃胶囊 + 文字 → 32bpp ARGB 位图 → UpdateLayeredWindow 呈现。
+        /// 由 gifTimer(16ms) 驱动；速度文本写入 Label 后下一帧自然反映。
+        /// 透明区域 alpha=0，系统对这类像素的命中测试自动穿透（不拦截鼠标）。
         /// </summary>
-        private void Panel_Paint(object sender, PaintEventArgs e)
+        private void RenderFrame()
         {
-            var g = e.Graphics;
-            g.SmoothingMode = SmoothingMode.HighQuality;   // 关闭抗锯齿：消除色键透明下的白边
+            if (!this.IsHandleCreated || this.IsDisposed) return;
+
+            int w = this.ClientSize.Width;
+            int h = this.ClientSize.Height;
+            if (w <= 0 || h <= 0) return;
+
+            // 复用画布，尺寸变化时才重建
+            if (renderBitmap == null || renderBitmap.Width != w || renderBitmap.Height != h)
+            {
+                if (renderBitmap != null) renderBitmap.Dispose();
+                renderBitmap = new Bitmap(w, h, PixelFormat.Format32bppArgb);
+            }
+
+            using (var g = Graphics.FromImage(renderBitmap))
+            {
+                g.Clear(Color.Transparent);   // 全透明起步，逐层叠加
+                DrawGifFrame(g);
+                DrawGlassCapsule(g);
+                DrawText(g);
+            }
+
+            PresentLayered(renderBitmap);
+        }
+
+        /// <summary>绘制 GIF 当前帧（拉伸到 pictureBox 区域，透明部分保持 alpha=0）。</summary>
+        private void DrawGifFrame(Graphics g)
+        {
+            if (gifFrames == null || gifFrameCount == 0) return;
+            var frame = gifFrames[gifFrameIndex];
+            if (frame == null) return;
+
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+            g.DrawImage(frame, pictureBox.Location.X, pictureBox.Location.Y, pictureBox.Width, pictureBox.Height);
+        }
+
+        /// <summary>
+        /// 绘制玻璃胶囊：纯白内部 + 纯黑描边，仅右侧文字区。
+        /// 分层窗口下可安全抗锯齿——边缘 alpha 渐变，无白边、丝滑。
+        /// </summary>
+        private void DrawGlassCapsule(Graphics g)
+        {
+            g.SmoothingMode = SmoothingMode.AntiAlias;
 
             const float gap      = 2f;    // 胶囊与窗体右缘的缝隙
             const float insetY   = 4f;    // 上下留白
             const float capWidth = 130f;  // 胶囊绘图区域长度（宽度）
-            float left = panel.Width - capWidth - gap;   // 右缘距窗体右缘 gap，长度固定 136
-            var r = new RectangleF(left, insetY, capWidth, panel.Height - insetY * 2);
+            float left = this.ClientSize.Width - capWidth - gap;
+            var r = new RectangleF(left, insetY, capWidth, this.ClientSize.Height - insetY * 2);
 
             using (var path = BuildCapsulePath(r))
             {
-                // 纯白内部（不穿越色键值 240）
                 using (var brush = new SolidBrush(Color.White))
-                {
                     g.FillPath(brush, path);
-                }
 
-                // 纯黑描边（最外圈；外圈之外仅透明色，无其他装饰色）
                 using (var pen = new Pen(Color.Black, 1.75f))
-                {
                     g.DrawPath(pen, path);
-                }
+            }
+        }
+
+        /// <summary>绘制文字：复用 Label 的字体/颜色/位置，保证与原有布局一致。</summary>
+        private void DrawText(Graphics g)
+        {
+            // ClearType 子像素抗锯齿：文字最平滑，消除灰度 AA 的“颗粒感”。
+            // 文字全部落在不透明的白色胶囊之上，ClearType 以白色为底正确渲染，
+            // 不会像画在透明背景上那样产生彩色杂边（文字区域不越过胶囊边界）。
+            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+            DrawLabel(g, labelup);
+            DrawLabel(g, Lable_SpeedUP);
+            DrawLabel(g, labeldwon);
+            DrawLabel(g, Lable_SpeedDown);
+        }
+
+        private void DrawLabel(Graphics g, Label lbl)
+        {
+            using (var brush = new SolidBrush(lbl.ForeColor))
+                g.DrawString(lbl.Text, lbl.Font, brush, lbl.Location.X, lbl.Location.Y);
+        }
+
+        /// <summary>把 ARGB 位图呈现为分层窗口内容（premultiplied alpha，逐像素混合）。</summary>
+        private void PresentLayered(Bitmap bmp)
+        {
+            IntPtr hdcScreen = NativeApi.GetDC(IntPtr.Zero);
+            IntPtr hdcMem    = NativeApi.CreateCompatibleDC(hdcScreen);
+            IntPtr hBitmap   = bmp.GetHbitmap(Color.FromArgb(0));   // 转 premultiplied alpha
+            IntPtr hOld      = NativeApi.SelectObject(hdcMem, hBitmap);
+
+            try
+            {
+                var size  = new NativeApi.SIZE  { cx = bmp.Width, cy = bmp.Height };
+                var ptSrc = new NativeApi.POINT { X = 0, Y = 0 };
+                var ptDst = new NativeApi.POINT { X = this.Left, Y = this.Top };
+                var blend = new NativeApi.BLENDFUNCTION
+                {
+                    BlendOp             = NativeApi.AC_SRC_OVER,
+                    BlendFlags          = 0,
+                    SourceConstantAlpha = 255,
+                    AlphaFormat         = NativeApi.AC_SRC_ALPHA
+                };
+
+                NativeApi.UpdateLayeredWindow(
+                    this.Handle, hdcScreen, ref ptDst, ref size,
+                    hdcMem, ref ptSrc, 0, ref blend, NativeApi.ULW_ALPHA);
+            }
+            finally
+            {
+                NativeApi.SelectObject(hdcMem, hOld);
+                NativeApi.DeleteObject(hBitmap);
+                NativeApi.DeleteDC(hdcMem);
+                NativeApi.ReleaseDC(IntPtr.Zero, hdcScreen);
             }
         }
 
@@ -232,7 +322,7 @@ namespace NetMonitor
             {
                 if (gifFrames == null || gifFrameCount == 0) return;
                 gifFrameIndex = (gifFrameIndex + gifStep) % gifFrameCount;
-                this.pictureBox.BackgroundImage = gifFrames[gifFrameIndex];
+                RenderFrame();   // 原 pictureBox.BackgroundImage = ...，现改整帧合成渲染
             }
             catch (Exception ex)
             {
@@ -575,12 +665,22 @@ namespace NetMonitor
 
         private void NetMonitor_MouseDown(object sender, MouseEventArgs e)
         {
-            // 无边框窗体拖动：释放鼠标捕获后发送系统移动命令
-            NativeApi.ReleaseCapture();
-            NativeApi.SendMessage(this.Handle,
-                NativeApi.WM_SYSCOMMAND,
-                NativeApi.SC_MOVE + NativeApi.HTCAPTION, 0);
-            WriteUserSettings();
+            if (e.Button == MouseButtons.Right)
+            {
+                // 右键弹出菜单（原由子控件 ContextMenuStrip 自动触发，现改手动）
+                Menu.Show(this, e.Location);
+                return;
+            }
+
+            if (e.Button == MouseButtons.Left)
+            {
+                // 无边框窗体拖动：释放鼠标捕获后发送系统移动命令
+                NativeApi.ReleaseCapture();
+                NativeApi.SendMessage(this.Handle,
+                    NativeApi.WM_SYSCOMMAND,
+                    NativeApi.SC_MOVE + NativeApi.HTCAPTION, 0);
+                WriteUserSettings();
+            }
         }
 
         private void Exit_Menu_MouseDown(object sender, MouseEventArgs e)
