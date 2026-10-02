@@ -25,11 +25,19 @@ namespace NetMonitor
         private DateTime prevSampleTime = DateTime.MinValue;
 
         //GIF 背景动画 
-        private System.Windows.Forms.Timer gifTimer;
+        private System.Timers.Timer gifTimer;
         private Image[] gifFrames;
         private int gifFrameIndex = 0;
         private int gifFrameCount = 0;
-        private int gifStep       = 1;   // GIF 步进：1=慢 / 2=中 / 4=快
+        private int gifStep       = 1;   // GIF 速度档位：1=60fps / 2=80fps / 3=100fps
+
+        // 帧调度精确计时：System.Timers.Timer 心跳 + Stopwatch 累积，保证精确帧率、不跳帧
+        private System.Diagnostics.Stopwatch gifSw;
+        private double gifAccumMs = 0;
+        private double gifFrameIntervalMs = 1000.0 / 60;   // 目标帧间隔，随档位变化
+
+        // 平滑后的「上传+下载」总速率，用于档位判定（EMA 削弱每秒瞬时波动）
+        private double smoothedTotalRate = 0;
 
         // 系统定时器 
         private System.Timers.Timer updateTimer;
@@ -266,7 +274,7 @@ namespace NetMonitor
                 if (gifTimer != null)
                 {
                     gifTimer.Stop();
-                    gifTimer.Tick -= GifTimer_Tick;
+                    gifTimer.Elapsed -= GifTimer_Elapsed;
                     gifTimer.Dispose();
                     gifTimer = null;
                 }
@@ -303,11 +311,18 @@ namespace NetMonitor
                     gifFrames[i] = bmp;
                 }
 
-                // ~60 FPS，实际速度由 gifStep 控制
-                gifTimer = new System.Windows.Forms.Timer { Interval = 16 };
+                // 提升系统定时器分辨率到 1ms（80/100fps 精确渲染的前提）
+                NativeApi.timeBeginPeriod(1);
+
+                // 帧率由 gifStep 档位决定（60/80/100fps），不再跳帧
                 gifFrameIndex = 0;
                 if (gifStep < 1) gifStep = 1;
-                gifTimer.Tick += GifTimer_Tick;
+                gifFrameIntervalMs = GetGifFrameIntervalMs();
+                gifSw = System.Diagnostics.Stopwatch.StartNew();
+
+                // 5ms 心跳 + Stopwatch 累积：心跳只负责“到点检查”，实际帧推进由累积时间决定
+                gifTimer = new System.Timers.Timer { Interval = 5, AutoReset = true };
+                gifTimer.Elapsed += GifTimer_Elapsed;
                 gifTimer.Start();
             }
             catch (Exception ex)
@@ -316,13 +331,45 @@ namespace NetMonitor
             }
         }
 
-        private void GifTimer_Tick(object sender, EventArgs e)
+        /// <summary>档位 → 目标帧间隔（毫秒）。gifStep：1=30fps / 2=100fps / 3=240fps。</summary>
+        private double GetGifFrameIntervalMs()
+        {
+            switch (gifStep)
+            {
+                case 3:  return 1000.0 / 240;   // 240fps（高速）
+                case 2:  return 1000.0 / 100;   // 100fps（中速）
+                default: return 1000.0 / 30;    // 30fps（低速）
+            }
+        }
+
+        private void GifTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
             try
             {
                 if (gifFrames == null || gifFrameCount == 0) return;
-                gifFrameIndex = (gifFrameIndex + gifStep) % gifFrameCount;
-                RenderFrame();   // 原 pictureBox.BackgroundImage = ...，现改整帧合成渲染
+                if (gifSw == null) { gifSw = System.Diagnostics.Stopwatch.StartNew(); return; }
+
+                // Stopwatch 累积实际经过时间，达到目标帧间隔才推进一帧（精确帧率，不跳帧）
+                gifAccumMs += gifSw.Elapsed.TotalMilliseconds;
+                gifSw.Restart();
+
+                if (gifAccumMs < gifFrameIntervalMs) return;
+                gifAccumMs = 0;
+
+                // 跨线程回 UI 线程渲染
+                if (this.IsHandleCreated && !this.IsDisposed)
+                {
+                    try
+                    {
+                        this.BeginInvoke((Action)(() =>
+                        {
+                            if (gifFrames == null || gifFrameCount == 0) return;
+                            gifFrameIndex = (gifFrameIndex + 1) % gifFrameCount;
+                            RenderFrame();
+                        }));
+                    }
+                    catch (InvalidOperationException) { /* 句柄已销毁，忽略 */ }
+                }
             }
             catch (Exception ex)
             {
@@ -460,14 +507,43 @@ namespace NetMonitor
             netSendPerSec = (long)(deltaSent / deltaSeconds);
             netRecvPerSec = (long)(deltaRecv / deltaSeconds);
 
-            // gifStep：按下载速度分三档
+            // gifStep：按「上传+下载」总速率分三档（决定动画帧率 60/80/100fps）
+            // 用 EMA 平滑 + 滞回判定，避免瞬时速率在阈值附近波动导致档位频繁跳变
             const long OneMB = 1024 * 1024;
             try
             {
-                if      (netRecvPerSec < OneMB)       gifStep = 1;   // < 1 MB/s
-                else if (netRecvPerSec < 10 * OneMB)  gifStep = 2;   // 1–10 MB/s
-                else                                   gifStep = 4;   // > 10 MB/s
-                if (gifStep < 1) gifStep = 1;
+                long totalRate = netSendPerSec + netRecvPerSec;   // 上传 + 下载总速率
+
+                // EMA 平滑（α=0.4）：削弱每秒瞬时波动，让档位判定更稳定
+                if (smoothedTotalRate <= 0)
+                    smoothedTotalRate = totalRate;
+                else
+                    smoothedTotalRate = smoothedTotalRate * 0.6 + totalRate * 0.4;
+
+                double rate = smoothedTotalRate;
+
+                // 滞回判定：升档/降档用不同阈值，中间留滞回带，避免临界点抖动
+                int newStep = gifStep;   // 默认保持当前档位
+                switch (gifStep)
+                {
+                    case 1:   // 档1 → 档2：需 > 1.2 MB/s
+                        if (rate >= OneMB * 1.2) newStep = 2;
+                        break;
+                    case 2:   // 档2 → 档3：需 > 12 MB/s；档2 → 档1：需 < 0.8 MB/s
+                        if      (rate >= OneMB * 12)  newStep = 3;
+                        else if (rate <  OneMB * 0.8) newStep = 1;
+                        break;
+                    case 3:   // 档3 → 档2：需 < 8 MB/s
+                        if (rate < OneMB * 8) newStep = 2;
+                        break;
+                }
+
+                // 档位变化时才更新目标帧间隔（避免每秒反复重设）
+                if (newStep != gifStep)
+                {
+                    gifStep = newStep;
+                    gifFrameIntervalMs = GetGifFrameIntervalMs();
+                }
             }
             catch { /* 保留当前 gifStep */ }
         }
@@ -982,23 +1058,23 @@ namespace NetMonitor
 
                 if (coversScreen && (coversTaskbar || taskbarAutoHide))
                 {
-                    Debug.WriteLine("前台窗口被判定为全屏（覆盖任务栏或任务栏自动隐藏）");
+                    //Debug.WriteLine("前台窗口被判定为全屏（覆盖任务栏或任务栏自动隐藏）");
                     return true;
                 }
 
                 // 面积覆盖率 ≥ 99.5% 时也认为是全屏
                 if ((double)(width * height) / (sb.Width * sb.Height) >= 0.995)
                 {
-                    Debug.WriteLine("前台窗口面积占比接近屏幕，判定为全屏");
+                    //Debug.WriteLine("前台窗口面积占比接近屏幕，判定为全屏");
                     return true;
                 }
 
-                Debug.WriteLine("前台窗口未判定为全屏");
+                //Debug.WriteLine("前台窗口未判定为全屏");
                 return false;
             }
-            catch (Exception ex)
+            catch
             {
-                Debug.WriteLine("isFullScreen 异常: " + ex.Message);
+                //Debug.WriteLine("isFullScreen 异常");
                 return false;
             }
         }
@@ -1140,6 +1216,10 @@ namespace NetMonitor
 
             // 取消网卡变动订阅，防止退出后残留引用
             NetworkChange.NetworkAddressChanged -= OnNetworkAddressChanged;
+
+            // 停止 GIF 动画并还原系统定时器分辨率
+            try { gifTimer?.Stop(); gifTimer?.Dispose(); } catch { }
+            NativeApi.timeEndPeriod(1);
 
             // 退出前显式隐藏托盘图标，防止幽灵图标残留
             if (trayIcon != null)

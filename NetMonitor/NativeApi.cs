@@ -180,5 +180,17 @@ namespace NetMonitor
         /// <summary>删除设备上下文。</summary>
         [DllImport("gdi32.dll")]
         internal static extern bool DeleteDC(IntPtr hdc);
+
+        // ══════════════════════════════════════════════════════════════════════════
+        // winmm.dll（多媒体定时器：提升系统定时器分辨率，供高帧率 GIF 动画使用）
+        // ══════════════════════════════════════════════════════════════════════════
+
+        /// <summary>将系统定时器分辨率提升到指定毫秒（如 1ms），是 80/100fps 精确渲染的前提。</summary>
+        [DllImport("winmm.dll")]
+        internal static extern uint timeBeginPeriod(uint uMilliseconds);
+
+        /// <summary>还原系统定时器分辨率（与 timeBeginPeriod 成对调用）。</summary>
+        [DllImport("winmm.dll")]
+        internal static extern uint timeEndPeriod(uint uMilliseconds);
     }
 }
