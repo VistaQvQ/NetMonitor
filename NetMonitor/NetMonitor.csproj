@@ -54,6 +54,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>NetMonitor.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -161,7 +162,6 @@
     <None Include="Resources\Catdog.gif" />
     <None Include="Resources\Cat.gif" />
     <None Include="Resources\Enjoywork.gif" />
-    <None Include="app.manifest" />
     <None Include="packages.config" />
     <EmbeddedResource Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

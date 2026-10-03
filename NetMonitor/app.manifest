@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+<assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
   <assemblyIdentity version="1.0.0.0" name="NetMonitor.app"/>
 
-  <!-- �����Ե�ǰ�û�Ȩ������ -->
   <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
     <security>
       <requestedPrivileges>
@@ -11,28 +10,11 @@
     </security>
   </trustInfo>
 
-  <!-- �����ݣ��Ͻӿڣ�Windows 7/8/8.1/10 �Կ�ʶ�� -->
-  <!-- legacy dpiAware ��֤����ϵͳ�Ͻ��̱���Ϊ DPI Aware��ϵͳ�����������ţ� -->
+  <!-- DPI 感知：让进程感知真实 DPI，避免 Windows 对窗口做位图缩放（保持清晰、固定尺寸） -->
   <application xmlns="urn:schemas-microsoft-com:asm.v3">
     <windowsSettings>
-      <!-- ��д�������ݽ��� Windows������ Windows 7/8�� -->
-      <dpiAware>true</dpiAware>
+      <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware>
+      <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2</dpiAwareness>
     </windowsSettings>
   </application>
-
-  <!-- ��д����Windows 8.1+ / Windows 10/11 �Ƽ�ʹ�� -->
-  <asmv3:application xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
-    <asmv3:windowsSettings>
-      <!-- PerMonitorV2 Ϊ Windows 10/11 �ϵ����ʵ��������ϵͳ���Ų�֧��ÿ��ʾ�����ţ� -->
-      <!-- ��ѡֵ: Unaware, System, PerMonitor, PerMonitorV2 -->
-      <dpiAwareness>PerMonitorV2</dpiAwareness>
-    </asmv3:windowsSettings>
-  </asmv3:application>
-
-  <!-- ��ѡ�����������ԣ��������ϵͳ�ϵ���Ϊһ���ԣ� -->
-  <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
-    <application>
-      <!-- ��ջ���� supportedOS �ڵ㣨�Ǳ��裩������֧�־��� Windows �汾����Ӷ�Ӧ GUID -->
-    </application>
-  </compatibility>
 </assembly>
