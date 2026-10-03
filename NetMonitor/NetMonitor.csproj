@@ -158,7 +158,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="NetMonitor.ico" />
-    <None Include="Resources\output.gif" />
+    <None Include="Resources\Catdog.gif" />
+    <None Include="Resources\Cat.gif" />
+    <None Include="Resources\Enjoywork.gif" />
     <None Include="app.manifest" />
     <None Include="packages.config" />
     <EmbeddedResource Include="Properties\Settings.settings">

@@ -265,7 +265,7 @@ namespace NetMonitor
 
         private void SetGifBackground()
         {
-            Image gif = Properties.Resources.Catdog;
+            Image gif = Properties.Resources.Enjoywork;
             if (gif == null) return;
 
             // 清理旧计时器
@@ -336,9 +336,9 @@ namespace NetMonitor
         {
             switch (gifStep)
             {
-                case 3:  return 1000.0 / 240;   // 240fps（高速）
-                case 2:  return 1000.0 / 100;   // 100fps（中速）
-                default: return 1000.0 / 30;    // 30fps（低速）
+                case 3:  return 1000.0 / 120;   // 120fps（高速）
+                case 2:  return 1000.0 / 50;   // 50fps（中速）
+                default: return 1000.0 / 15;    // 15fps（低速）
             }
         }
 
@@ -400,10 +400,10 @@ namespace NetMonitor
         {
             bool fullScreen = isFullScreen();
             bool shouldShow = !fullScreen || this.ShowInFullScreen_ToolStripMenuItem.Checked;
-            Debug.WriteLine(
-                $"[UpdateVisibility] isFullScreen={fullScreen}, " +
-                $"ShowInFullScreen={this.ShowInFullScreen_ToolStripMenuItem.Checked}, " +
-                $"shouldShow={shouldShow}, currentVisible={this.Visible}");
+            //Debug.WriteLine(
+            //    $"[UpdateVisibility] isFullScreen={fullScreen}, " +
+            //    $"ShowInFullScreen={this.ShowInFullScreen_ToolStripMenuItem.Checked}, " +
+            //    $"shouldShow={shouldShow}, currentVisible={this.Visible}");
             this.Visible = shouldShow;
         }
         private void UpdateSingleMode()
