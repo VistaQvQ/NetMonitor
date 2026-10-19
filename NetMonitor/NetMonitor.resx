@@ -117,250 +117,250 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <metadata name="Menu.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+  <metadata name="contextMenu.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>13, 18</value>
   </metadata>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="Menu.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="contextMenu.Size" type="System.Drawing.Size, System.Drawing">
     <value>137, 118</value>
   </data>
-  <data name="&gt;&gt;Menu.Name" xml:space="preserve">
-    <value>Menu</value>
+  <data name="&gt;&gt;contextMenu.Name" xml:space="preserve">
+    <value>contextMenu</value>
   </data>
-  <data name="&gt;&gt;Menu.Type" xml:space="preserve">
+  <data name="&gt;&gt;contextMenu.Type" xml:space="preserve">
     <value>System.Windows.Forms.ContextMenuStrip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="Interface_Menu.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="interfaceMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>136, 20</value>
   </data>
-  <data name="Interface_Menu.Text" xml:space="preserve">
+  <data name="interfaceMenuItem.Text" xml:space="preserve">
     <value>网卡选择</value>
   </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="ComboBox.FlatStyle" type="System.Windows.Forms.FlatStyle, System.Windows.Forms">
+  <data name="interfaceComboBox.FlatStyle" type="System.Windows.Forms.FlatStyle, System.Windows.Forms">
     <value>Standard</value>
   </data>
-  <data name="ComboBox.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="interfaceComboBox.Size" type="System.Drawing.Size, System.Drawing">
     <value>75, 25</value>
   </data>
-  <data name="MultNicMode_ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="multiNicModeMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>136, 22</value>
   </data>
-  <data name="MultNicMode_ToolStripMenuItem.Text" xml:space="preserve">
+  <data name="multiNicModeMenuItem.Text" xml:space="preserve">
     <value>多网卡模式</value>
   </data>
-  <data name="ShowInFullScreen_ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="showInFullScreenMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>136, 22</value>
   </data>
-  <data name="ShowInFullScreen_ToolStripMenuItem.Text" xml:space="preserve">
+  <data name="showInFullScreenMenuItem.Text" xml:space="preserve">
     <value>全屏显示</value>
   </data>
-  <data name="toolStripSeparator.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="separatorMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>133, 6</value>
   </data>
-  <data name="AutoRun_ToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="autoRunMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>136, 22</value>
   </data>
-  <data name="AutoRun_ToolStripMenuItem.Text" xml:space="preserve">
+  <data name="autoRunMenuItem.Text" xml:space="preserve">
     <value>开机自启</value>
   </data>
-  <data name="Exit_Menu.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="exitMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>136, 22</value>
   </data>
-  <data name="Exit_Menu.Text" xml:space="preserve">
+  <data name="exitMenuItem.Text" xml:space="preserve">
     <value>退出</value>
   </data>
-  <metadata name="panel.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <metadata name="containerPanel.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <data name="panel.BackgroundImageLayout" type="System.Windows.Forms.ImageLayout, System.Windows.Forms">
+  <data name="containerPanel.BackgroundImageLayout" type="System.Windows.Forms.ImageLayout, System.Windows.Forms">
     <value>Stretch</value>
   </data>
-  <metadata name="Lable_SpeedDown.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <metadata name="downloadSpeedLabel.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
   <assembly alias="mscorlib" name="mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="Lable_SpeedDown.AutoSize" type="System.Boolean, mscorlib">
+  <data name="downloadSpeedLabel.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
-  <data name="Lable_SpeedDown.Font" type="System.Drawing.Font, System.Drawing">
+  <data name="downloadSpeedLabel.Font" type="System.Drawing.Font, System.Drawing">
     <value>楷体, 10.5pt, style=Bold</value>
   </data>
-  <data name="Lable_SpeedDown.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="downloadSpeedLabel.Location" type="System.Drawing.Point, System.Drawing">
     <value>116, 32</value>
   </data>
-  <data name="Lable_SpeedDown.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="downloadSpeedLabel.Size" type="System.Drawing.Size, System.Drawing">
     <value>55, 14</value>
   </data>
-  <data name="Lable_SpeedDown.TabIndex" type="System.Int32, mscorlib">
+  <data name="downloadSpeedLabel.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
   </data>
-  <data name="Lable_SpeedDown.Text" xml:space="preserve">
+  <data name="downloadSpeedLabel.Text" xml:space="preserve">
     <value>  0B/S</value>
   </data>
-  <data name="&gt;&gt;Lable_SpeedDown.Name" xml:space="preserve">
-    <value>Lable_SpeedDown</value>
+  <data name="&gt;&gt;downloadSpeedLabel.Name" xml:space="preserve">
+    <value>downloadSpeedLabel</value>
   </data>
-  <data name="&gt;&gt;Lable_SpeedDown.Type" xml:space="preserve">
+  <data name="&gt;&gt;downloadSpeedLabel.Type" xml:space="preserve">
     <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;Lable_SpeedDown.Parent" xml:space="preserve">
-    <value>panel</value>
+  <data name="&gt;&gt;downloadSpeedLabel.Parent" xml:space="preserve">
+    <value>containerPanel</value>
   </data>
-  <data name="&gt;&gt;Lable_SpeedDown.ZOrder" xml:space="preserve">
+  <data name="&gt;&gt;downloadSpeedLabel.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
-  <metadata name="Lable_SpeedUP.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <metadata name="uploadSpeedLabel.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <data name="Lable_SpeedUP.AutoSize" type="System.Boolean, mscorlib">
+  <data name="uploadSpeedLabel.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
-  <data name="Lable_SpeedUP.Font" type="System.Drawing.Font, System.Drawing">
+  <data name="uploadSpeedLabel.Font" type="System.Drawing.Font, System.Drawing">
     <value>楷体, 10.5pt, style=Bold</value>
   </data>
-  <data name="Lable_SpeedUP.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="uploadSpeedLabel.Location" type="System.Drawing.Point, System.Drawing">
     <value>116, 11</value>
   </data>
-  <data name="Lable_SpeedUP.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="uploadSpeedLabel.Size" type="System.Drawing.Size, System.Drawing">
     <value>55, 14</value>
   </data>
-  <data name="Lable_SpeedUP.TabIndex" type="System.Int32, mscorlib">
+  <data name="uploadSpeedLabel.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
   </data>
-  <data name="Lable_SpeedUP.Text" xml:space="preserve">
+  <data name="uploadSpeedLabel.Text" xml:space="preserve">
     <value>  0B/S</value>
   </data>
-  <data name="&gt;&gt;Lable_SpeedUP.Name" xml:space="preserve">
-    <value>Lable_SpeedUP</value>
+  <data name="&gt;&gt;uploadSpeedLabel.Name" xml:space="preserve">
+    <value>uploadSpeedLabel</value>
   </data>
-  <data name="&gt;&gt;Lable_SpeedUP.Type" xml:space="preserve">
+  <data name="&gt;&gt;uploadSpeedLabel.Type" xml:space="preserve">
     <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;Lable_SpeedUP.Parent" xml:space="preserve">
-    <value>panel</value>
+  <data name="&gt;&gt;uploadSpeedLabel.Parent" xml:space="preserve">
+    <value>containerPanel</value>
   </data>
-  <data name="&gt;&gt;Lable_SpeedUP.ZOrder" xml:space="preserve">
+  <data name="&gt;&gt;uploadSpeedLabel.ZOrder" xml:space="preserve">
     <value>1</value>
   </data>
-  <metadata name="labeldwon.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <metadata name="downloadLabel.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <data name="labeldwon.AutoSize" type="System.Boolean, mscorlib">
+  <data name="downloadLabel.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
-  <data name="labeldwon.Font" type="System.Drawing.Font, System.Drawing">
+  <data name="downloadLabel.Font" type="System.Drawing.Font, System.Drawing">
     <value>楷体, 10.5pt, style=Bold</value>
   </data>
-  <data name="labeldwon.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="downloadLabel.Location" type="System.Drawing.Point, System.Drawing">
     <value>74, 32</value>
   </data>
-  <data name="labeldwon.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="downloadLabel.Size" type="System.Drawing.Size, System.Drawing">
     <value>52, 14</value>
   </data>
-  <data name="labeldwon.TabIndex" type="System.Int32, mscorlib">
+  <data name="downloadLabel.TabIndex" type="System.Int32, mscorlib">
     <value>4</value>
   </data>
-  <data name="labeldwon.Text" xml:space="preserve">
+  <data name="downloadLabel.Text" xml:space="preserve">
     <value>下载：</value>
   </data>
-  <data name="&gt;&gt;labeldwon.Name" xml:space="preserve">
-    <value>labeldwon</value>
+  <data name="&gt;&gt;downloadLabel.Name" xml:space="preserve">
+    <value>downloadLabel</value>
   </data>
-  <data name="&gt;&gt;labeldwon.Type" xml:space="preserve">
+  <data name="&gt;&gt;downloadLabel.Type" xml:space="preserve">
     <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;labeldwon.Parent" xml:space="preserve">
-    <value>panel</value>
+  <data name="&gt;&gt;downloadLabel.Parent" xml:space="preserve">
+    <value>containerPanel</value>
   </data>
-  <data name="&gt;&gt;labeldwon.ZOrder" xml:space="preserve">
+  <data name="&gt;&gt;downloadLabel.ZOrder" xml:space="preserve">
     <value>2</value>
   </data>
-  <metadata name="labelup.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <metadata name="uploadLabel.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <data name="labelup.AutoSize" type="System.Boolean, mscorlib">
+  <data name="uploadLabel.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
-  <data name="labelup.Font" type="System.Drawing.Font, System.Drawing">
+  <data name="uploadLabel.Font" type="System.Drawing.Font, System.Drawing">
     <value>楷体, 10.5pt, style=Bold</value>
   </data>
-  <data name="labelup.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="uploadLabel.Location" type="System.Drawing.Point, System.Drawing">
     <value>74, 11</value>
   </data>
-  <data name="labelup.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="uploadLabel.Size" type="System.Drawing.Size, System.Drawing">
     <value>52, 14</value>
   </data>
-  <data name="labelup.TabIndex" type="System.Int32, mscorlib">
+  <data name="uploadLabel.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
   </data>
-  <data name="labelup.Text" xml:space="preserve">
+  <data name="uploadLabel.Text" xml:space="preserve">
     <value>上传：</value>
   </data>
-  <data name="&gt;&gt;labelup.Name" xml:space="preserve">
-    <value>labelup</value>
+  <data name="&gt;&gt;uploadLabel.Name" xml:space="preserve">
+    <value>uploadLabel</value>
   </data>
-  <data name="&gt;&gt;labelup.Type" xml:space="preserve">
+  <data name="&gt;&gt;uploadLabel.Type" xml:space="preserve">
     <value>System.Windows.Forms.Label, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;labelup.Parent" xml:space="preserve">
-    <value>panel</value>
+  <data name="&gt;&gt;uploadLabel.Parent" xml:space="preserve">
+    <value>containerPanel</value>
   </data>
-  <data name="&gt;&gt;labelup.ZOrder" xml:space="preserve">
+  <data name="&gt;&gt;uploadLabel.ZOrder" xml:space="preserve">
     <value>3</value>
   </data>
-  <metadata name="pictureBox.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  <metadata name="gifPictureBox.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
-  <data name="pictureBox.BackgroundImageLayout" type="System.Windows.Forms.ImageLayout, System.Windows.Forms">
+  <data name="gifPictureBox.BackgroundImageLayout" type="System.Windows.Forms.ImageLayout, System.Windows.Forms">
     <value>Stretch</value>
   </data>
-  <data name="pictureBox.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="gifPictureBox.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
   </data>
-  <data name="pictureBox.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="gifPictureBox.Size" type="System.Drawing.Size, System.Drawing">
     <value>56, 56</value>
   </data>
-  <data name="pictureBox.SizeMode" type="System.Windows.Forms.PictureBoxSizeMode, System.Windows.Forms">
+  <data name="gifPictureBox.SizeMode" type="System.Windows.Forms.PictureBoxSizeMode, System.Windows.Forms">
     <value>StretchImage</value>
   </data>
-  <data name="pictureBox.TabIndex" type="System.Int32, mscorlib">
+  <data name="gifPictureBox.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
   </data>
-  <data name="&gt;&gt;pictureBox.Name" xml:space="preserve">
-    <value>pictureBox</value>
+  <data name="&gt;&gt;gifPictureBox.Name" xml:space="preserve">
+    <value>gifPictureBox</value>
   </data>
-  <data name="&gt;&gt;pictureBox.Type" xml:space="preserve">
+  <data name="&gt;&gt;gifPictureBox.Type" xml:space="preserve">
     <value>System.Windows.Forms.PictureBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;pictureBox.Parent" xml:space="preserve">
-    <value>panel</value>
+  <data name="&gt;&gt;gifPictureBox.Parent" xml:space="preserve">
+    <value>containerPanel</value>
   </data>
-  <data name="&gt;&gt;pictureBox.ZOrder" xml:space="preserve">
+  <data name="&gt;&gt;gifPictureBox.ZOrder" xml:space="preserve">
     <value>4</value>
   </data>
-  <data name="panel.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
+  <data name="containerPanel.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
     <value>Fill</value>
   </data>
-  <data name="panel.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="containerPanel.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
   </data>
-  <data name="panel.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="containerPanel.Size" type="System.Drawing.Size, System.Drawing">
     <value>193, 56</value>
   </data>
-  <data name="panel.TabIndex" type="System.Int32, mscorlib">
+  <data name="containerPanel.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
   </data>
-  <data name="&gt;&gt;panel.Name" xml:space="preserve">
-    <value>panel</value>
+  <data name="&gt;&gt;containerPanel.Name" xml:space="preserve">
+    <value>containerPanel</value>
   </data>
-  <data name="&gt;&gt;panel.Type" xml:space="preserve">
+  <data name="&gt;&gt;containerPanel.Type" xml:space="preserve">
     <value>System.Windows.Forms.Panel, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;panel.Parent" xml:space="preserve">
+  <data name="&gt;&gt;containerPanel.Parent" xml:space="preserve">
     <value>$this</value>
   </data>
-  <data name="&gt;&gt;panel.ZOrder" xml:space="preserve">
+  <data name="&gt;&gt;containerPanel.ZOrder" xml:space="preserve">
     <value>1</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
@@ -1525,46 +1525,46 @@
   <data name="$this.Text" xml:space="preserve">
     <value>NetMonitor</value>
   </data>
-  <data name="&gt;&gt;Interface_Menu.Name" xml:space="preserve">
-    <value>Interface_Menu</value>
+  <data name="&gt;&gt;interfaceMenuItem.Name" xml:space="preserve">
+    <value>interfaceMenuItem</value>
   </data>
-  <data name="&gt;&gt;Interface_Menu.Type" xml:space="preserve">
+  <data name="&gt;&gt;interfaceMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;ComboBox.Name" xml:space="preserve">
-    <value>ComboBox</value>
+  <data name="&gt;&gt;interfaceComboBox.Name" xml:space="preserve">
+    <value>interfaceComboBox</value>
   </data>
-  <data name="&gt;&gt;ComboBox.Type" xml:space="preserve">
+  <data name="&gt;&gt;interfaceComboBox.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripComboBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;MultNicMode_ToolStripMenuItem.Name" xml:space="preserve">
-    <value>MultNicMode_ToolStripMenuItem</value>
+  <data name="&gt;&gt;multiNicModeMenuItem.Name" xml:space="preserve">
+    <value>multiNicModeMenuItem</value>
   </data>
-  <data name="&gt;&gt;MultNicMode_ToolStripMenuItem.Type" xml:space="preserve">
+  <data name="&gt;&gt;multiNicModeMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;ShowInFullScreen_ToolStripMenuItem.Name" xml:space="preserve">
-    <value>ShowInFullScreen_ToolStripMenuItem</value>
+  <data name="&gt;&gt;showInFullScreenMenuItem.Name" xml:space="preserve">
+    <value>showInFullScreenMenuItem</value>
   </data>
-  <data name="&gt;&gt;ShowInFullScreen_ToolStripMenuItem.Type" xml:space="preserve">
+  <data name="&gt;&gt;showInFullScreenMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;toolStripSeparator.Name" xml:space="preserve">
-    <value>toolStripSeparator</value>
+  <data name="&gt;&gt;separatorMenuItem.Name" xml:space="preserve">
+    <value>separatorMenuItem</value>
   </data>
-  <data name="&gt;&gt;toolStripSeparator.Type" xml:space="preserve">
+  <data name="&gt;&gt;separatorMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;AutoRun_ToolStripMenuItem.Name" xml:space="preserve">
-    <value>AutoRun_ToolStripMenuItem</value>
+  <data name="&gt;&gt;autoRunMenuItem.Name" xml:space="preserve">
+    <value>autoRunMenuItem</value>
   </data>
-  <data name="&gt;&gt;AutoRun_ToolStripMenuItem.Type" xml:space="preserve">
+  <data name="&gt;&gt;autoRunMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;Exit_Menu.Name" xml:space="preserve">
-    <value>Exit_Menu</value>
+  <data name="&gt;&gt;exitMenuItem.Name" xml:space="preserve">
+    <value>exitMenuItem</value>
   </data>
-  <data name="&gt;&gt;Exit_Menu.Type" xml:space="preserve">
+  <data name="&gt;&gt;exitMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">

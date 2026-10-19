@@ -128,6 +128,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="NativeApi.cs" />
+    <Compile Include="Core\NetworkMonitorService.cs" />
+    <Compile Include="Core\FullScreenDetector.cs" />
+    <Compile Include="Core\GifAnimator.cs" />
+    <Compile Include="Core\AutoStartManager.cs" />
+    <Compile Include="Rendering\LayeredWindowRenderer.cs" />
+    <Compile Include="Services\AppSettingsService.cs" />
+    <Compile Include="Services\TrayIconService.cs" />
     <Compile Include="NetMonitor.cs">
       <SubType>Form</SubType>
     </Compile>

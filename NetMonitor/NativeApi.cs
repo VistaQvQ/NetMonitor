@@ -42,7 +42,15 @@ namespace NetMonitor
         // 扩展样式
         internal const int  GWL_EXSTYLE    = -20;
         internal const int  WS_EX_TOOLWINDOW = 0x00000080;
+        internal const int  WS_EX_APPWINDOW  = 0x00040000;  // 强制出现在任务栏
         internal const int  WS_EX_LAYERED    = 0x00080000;
+
+        // SetWindowPos 标志
+        internal const uint SWP_NOSIZE        = 0x0001;
+        internal const uint SWP_NOMOVE        = 0x0002;
+        internal const uint SWP_NOZORDER      = 0x0004;
+        internal const uint SWP_NOACTIVATE    = 0x0010;
+        internal const uint SWP_FRAMECHANGED  = 0x0020;  // 强制重新读取样式
 
         // GetWindow 关系
         internal const uint GW_OWNER       = 4;
@@ -89,6 +97,16 @@ namespace NetMonitor
         /// <summary>读取窗口整型属性（如扩展样式 GWL_EXSTYLE）。</summary>
         [DllImport("user32.dll", SetLastError = true)]
         internal static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
+        /// <summary>设置窗口整型属性（如扩展样式 GWL_EXSTYLE）。</summary>
+        [DllImport("user32.dll", SetLastError = true)]
+        internal static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
+        /// <summary>设置窗口位置/大小/Z 序/样式刷新。</summary>
+        [DllImport("user32.dll", SetLastError = true)]
+        internal static extern bool SetWindowPos(
+            IntPtr hWnd, IntPtr hWndInsertAfter,
+            int X, int Y, int cx, int cy, uint uFlags);
 
         /// <summary>枚举所有顶级窗口。</summary>
         internal delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
